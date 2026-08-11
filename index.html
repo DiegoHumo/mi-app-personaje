@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ON Custom Images 4K: Flow Optimizer v2.1</title>
+<title>ON Custom Images 4K: Flow Optimizer v3</title>
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <style>
 :root{--bg:#0f172a;--card:#1e293b;--accent:#38bdf8;--text:#f8fafc}
@@ -28,7 +28,7 @@ canvas{display:block;margin:auto;max-width:100%;border:1px solid #334155;backgro
 </head>
 <body>
 <div class="container">
-<h1>🧠 ON Custom Images 4K: Flow Optimizer v2.1</h1>
+<h1>🧠 ON Custom Images 4K: Flow Optimizer v3</h1>
 <div class="controls">
 <h3>1. Generador de Prompts Maestros</h3>
 <div class="input-group">
@@ -43,8 +43,8 @@ canvas{display:block;margin:auto;max-width:100%;border:1px solid #334155;backgro
 <div id="prompts-output" class="prompt-box" style="display:none"></div>
 </div>
 <div class="controls">
-<h3>2. Cargador y Auto-Calibrador 1:1</h3>
-<p>Sube las 5 imágenes generadas. El sistema detectará los rostros y los escalará matemáticamente.</p>
+<h3>2. Cargador y Auto-Calibrador 1:1 (Layout Zuppelli)</h3>
+<p>Sube las 5 imágenes. El sistema detectará los rostros, los calibrará 1:1 y los ubicará en el layout profesional.</p>
 <div class="grid">
 <label class="drop-zone" id="zone-0"><input type="file" accept="image/*" onchange="handleFile(0,this)"><span>📷 1. Busto Frontal (Ancla)</span></label>
 <label class="drop-zone" id="zone-1"><input type="file" accept="image/*" onchange="handleFile(1,this)"><span>👤 2. Perfil Derecho</span></label>
@@ -56,20 +56,20 @@ canvas{display:block;margin:auto;max-width:100%;border:1px solid #334155;backgro
 <div id="log">[Sistema] Esperando carga de modelos de IA...</div>
 </div>
 <div class="controls" style="text-align:center">
-<h3>3. Character Sheet Master (4K)</h3>
+<h3>3. Character Sheet Master (4K - Layout Zuppelli)</h3>
 <canvas id="sheet-canvas" width="3840" height="3000"></canvas>
 <button onclick="downloadSheet()" style="margin-top:15px">💾 Descargar PNG 4K</button>
 </div>
 </div>
 <script>
 const state={images:[null,null,null,null,null]};
-const TARGET_FACE_H=460;
+const TARGET_FACE_H=800;
 const FRAMES={
- profL:{x:60,y:40,w:1160,h:1000,label:'PERFIL IZQUIERDO'},
- front:{x:1340,y:40,w:1160,h:1000,label:'FRONTAL (ANCLA)'},
- profR:{x:2620,y:40,w:1160,h:1000,label:'PERFIL DERECHO'},
- bodyF:{x:60,y:1080,w:1830,h:1880,label:'CUERPO FRONTAL (SIN CABEZA)'},
- bodyB:{x:1950,y:1080,w:1830,h:1880,label:'ESPALDA LIMPIA'}
+ front:{x:40,y:40,w:1800,h:2920,off:0.62,label:'FRONTAL (ANCLA)'},
+ profR:{x:1880,y:40,w:1250,h:1440,off:0.70,label:'PERFIL DER'},
+ profL:{x:1880,y:1520,w:1250,h:1440,off:0.70,label:'PERFIL IZQ'},
+ bodyF:{x:3170,y:40,w:630,h:1440,label:'CUERPO FRENTE'},
+ bodyB:{x:3170,y:1520,w:630,h:1440,label:'ESPALDA'}
 };
 const log=m=>{const l=document.getElementById('log');l.innerHTML+='<br>'+m;l.scrollTop=l.scrollHeight};
 async function init(){try{const U='https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';await faceapi.nets.tinyFaceDetector.loadFromUri(U);await faceapi.nets.faceLandmark68Net.loadFromUri(U);log('[Éxito] Modelos de Visión por Computadora cargados.')}catch(e){log('[Error] No se pudieron cargar los modelos. Usa Live Server o HTTPS.')}}
@@ -77,9 +77,9 @@ init();
 function handleFile(i,input){if(input.files&&input.files[0]){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=()=>{state.images[i]=img;document.getElementById('zone-'+i).innerHTML='<img src="'+e.target.result+'"><span>Listo</span>';checkReady()};img.src=e.target.result};r.readAsDataURL(input.files[0])}}
 function checkReady(){if(state.images[0]&&state.images[1]&&state.images[2])document.getElementById('btn-process').disabled=false}
 async function getFaceMetrics(img){const c=document.createElement('canvas');c.width=img.width;c.height=img.height;const x=c.getContext('2d');x.drawImage(img,0,0);const d=await faceapi.detectSingleFace(c,new faceapi.TinyFaceDetectorOptions({inputSize:512,scoreThreshold:0.3})).withFaceLandmarks();if(!d)return null;const p=d.landmarks.positions,t=p[27],b=p[8];return{h:Math.abs(b.y-t.y),cx:(t.x+b.x)/2,cy:(t.y+b.y)/2}}
-function drawFaceInFrame(img,m,frame){const ctx=document.getElementById('sheet-canvas').getContext('2d');const s=TARGET_FACE_H/m.h;ctx.save();ctx.beginPath();ctx.rect(frame.x,frame.y,frame.w,frame.h);ctx.clip();const dw=img.width*s,dh=img.height*s;ctx.drawImage(img,frame.x+frame.w/2-m.cx*s,frame.y+frame.h/2-m.cy*s,dw,dh);ctx.restore();return s}
+function drawFaceInFrame(img,m,frame){const ctx=document.getElementById('sheet-canvas').getContext('2d');const s=TARGET_FACE_H/m.h;const off=frame.off||0.62;ctx.save();ctx.beginPath();ctx.rect(frame.x,frame.y,frame.w,frame.h);ctx.clip();const dw=img.width*s,dh=img.height*s;ctx.drawImage(img,frame.x+frame.w/2-m.cx*s,frame.y+frame.h*off-m.cy*s,dw,dh);ctx.restore();return s}
 function drawFitInFrame(img,frame){const ctx=document.getElementById('sheet-canvas').getContext('2d');const s=Math.min(frame.w/img.width,frame.h/img.height);const dw=img.width*s,dh=img.height*s;ctx.drawImage(img,frame.x+(frame.w-dw)/2,frame.y+(frame.h-dh)/2,dw,dh)}
-function drawLabels(){const ctx=document.getElementById('sheet-canvas').getContext('2d');ctx.fillStyle='#64748b';ctx.font='bold 40px sans-serif';for(const k in FRAMES){const f=FRAMES[k];ctx.fillText(f.label,f.x+20,f.y+55)}}
+function drawLabels(){const ctx=document.getElementById('sheet-canvas').getContext('2d');ctx.fillStyle='#64748b';ctx.font='bold 36px sans-serif';for(const k in FRAMES){const f=FRAMES[k];ctx.fillText(f.label,f.x+20,f.y+50)}}
 async function processAndAssemble(){
  log('Procesando... calculando métricas faciales...');
  const ctx=document.getElementById('sheet-canvas').getContext('2d');
