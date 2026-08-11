@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ON Custom Images 4K: Flow Optimizer v7 (Calibre Digital)</title>
+<title>ON Custom Images 4K: Flow Optimizer</title>
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <style>
 :root{--bg:#0f172a;--card:#1e293b;--accent:#38bdf8;--text:#f8fafc}
@@ -37,7 +37,7 @@ canvas{display:block;width:100%;border:1px solid #334155;background:#fff}
 </head>
 <body>
 <div class="container">
-<h1>🧠 ON Custom Images 4K: Flow Optimizer v7</h1>
+<h1>🧠 ON Custom Images 4K: Flow Optimizer</h1>
 <div class="controls">
 <h3>1. Generador de Prompts Maestros</h3>
 <div class="input-group">
@@ -70,19 +70,19 @@ canvas{display:block;width:100%;border:1px solid #334155;background:#fff}
 <label><input type="checkbox" id="calchk" onchange="setCal(this.checked)"> ACTIVAR BANDA ROJA DE REFERENCIA</label>
 <label>↕️ Banda Y en PERFIL DER: <b id="cv1">300</b><input type="range" id="cal1" min="0" max="1200" step="5" value="300" oninput="setCalY(1,this.value)"></label>
 <label>↕️ Banda Y en PERFIL IZQ: <b id="cv2">300</b><input type="range" id="cal2" min="0" max="1200" step="5" value="300" oninput="setCalY(2,this.value)"></label>
-<p style="color:#fecaca;margin:4px 0">La altura de la banda = distancia ojo→mentón del FRONTAL. Mové el Zoom de cada perfil hasta que su cara encaje exactamente dentro de la banda.</p>
+<p style="color:#fecaca;margin:4px 0">La altura de la banda = distancia ojo→mentón del FRONTAL. Subí la banda hasta la línea de ojos del perfil y mové su Zoom hasta que el mentón toque el borde inferior. Al descargar, la banda se excluye sola.</p>
 </div>
 </div>
 <div class="controls">
-<h3>4. Controles por pieza (Zoom / X / Y)</h3>
+<h3>4. Controles por pieza (Zoom anclado a la cara / X / Y)</h3>
 <div id="panels"></div>
 </div>
 </div>
 <div class="rightcol">
 <div class="controls">
-<h3>Character Sheet (Plantilla Zuppelli)</h3>
+<h3>Hoja de Personaje Master (4K)</h3>
 <canvas id="sheet-canvas" width="3840" height="2600"></canvas>
-<button onclick="downloadSheet()" style="margin-top:10px">💾 Descargar PNG Final</button>
+<button onclick="downloadSheet()" style="margin-top:10px">💾 Descargar PNG Final (limpio)</button>
 </div>
 </div>
 </div>
@@ -103,19 +103,21 @@ function setCal(v){showCal=v;render()}
 function setCalY(i,v){calY[i]=+v;document.getElementById('cv'+i).textContent=v;render()}
 function buildPanels(){document.getElementById('panels').innerHTML=PIECES.map((p,i)=>`
 <div class="panel"><h4>🎛️ ${p.label}</h4>
-<label>🔍 Zoom: <b id="z${i}">1.00</b>x<input type="range" id="zi${i}" min="0.4" max="2.5" step="0.01" value="1" oninput="setP(${i},'s',this.value)"></label>
-<label>↔️ X: <b id="x${i}">0</b><input type="range" id="xi${i}" min="-1900" max="1900" step="10" value="0" oninput="setP(${i},'px',this.value)"></label>
-<label>↕️ Y: <b id="y${i}">0</b><input type="range" id="yi${i}" min="-1900" max="1900" step="10" value="0" oninput="setP(${i},'py',this.value)"></label>
+<label>🔍 Zoom: <b id="z${i}">1.000</b>x<input type="range" id="zi${i}" min="0.4" max="2.5" step="0.005" value="1" oninput="setP(${i},'s',this.value)"></label>
+<label>↔️ X: <b id="x${i}">0</b><input type="range" id="xi${i}" min="-1900" max="1900" step="2" value="0" oninput="setP(${i},'px',this.value)"></label>
+<label>↕️ Y: <b id="y${i}">0</b><input type="range" id="yi${i}" min="-1900" max="1900" step="2" value="0" oninput="setP(${i},'py',this.value)"></label>
 </div>`).join('')}
 buildPanels();
-function setP(i,k,v){P[i][k]=parseFloat(v);document.getElementById((k==='s'?'z':k==='px'?'x':'y')+i).textContent=k==='s'?parseFloat(v).toFixed(2):Math.round(v);render()}
-function sync(i){document.getElementById('zi'+i).value=P[i].s;document.getElementById('xi'+i).value=P[i].px;document.getElementById('yi'+i).value=P[i].py;document.getElementById('z'+i).textContent=P[i].s.toFixed(2);document.getElementById('x'+i).textContent=Math.round(P[i].px);document.getElementById('y'+i).textContent=Math.round(P[i].py)}
+function setP(i,k,v){const p=P[i];v=parseFloat(v);
+ if(k==='s'&&p.m&&p.img){const cx=p.m.cx-p.img.width/2,cy=p.m.cy-p.img.height/2;p.px+=cx*(p.s-v);p.py+=cy*(p.s-v);}
+ p[k]=v;sync(i);render()}
+function sync(i){document.getElementById('zi'+i).value=P[i].s;document.getElementById('xi'+i).value=P[i].px;document.getElementById('yi'+i).value=P[i].py;document.getElementById('z'+i).textContent=P[i].s.toFixed(3);document.getElementById('x'+i).textContent=Math.round(P[i].px);document.getElementById('y'+i).textContent=Math.round(P[i].py)}
 async function init(){try{const U='https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';await faceapi.nets.tinyFaceDetector.loadFromUri(U);await faceapi.nets.faceLandmark68Net.loadFromUri(U);log('[Éxito] Modelos de IA cargados.')}catch(e){log('[Error] No se pudieron cargar los modelos.')}}
 init();
 async function getFaceMetrics(img){const c=document.createElement('canvas');c.width=img.width;c.height=img.height;const x=c.getContext('2d');x.drawImage(img,0,0);const d=await faceapi.detectSingleFace(c,new faceapi.TinyFaceDetectorOptions({inputSize:512,scoreThreshold:0.3})).withFaceLandmarks();if(!d)return null;const p=d.landmarks.positions,t=p[27],b=p[8];return{h:Math.abs(b.y-t.y),cx:(t.x+b.x)/2,cy:(t.y+b.y)/2}}
 function fitScale(i){const f=PIECES[i].frame;return Math.min(f.w/P[i].img.width,f.h/P[i].img.height)}
 function applyAuto(i){const p=P[i],f=PIECES[i].frame;
- if(PIECES[i].type==='face'&&p.m){p.s=TARGET_FACE_H/p.m.h;p.px=(p.img.width/2-p.m.cx)*p.s;p.py=f.h*(PIECES[i].off-0.5)+(p.img.height/2-p.m.cy)*p.s;log(PIECES[i].label+': auto-ajuste aplicado (zoom '+p.s.toFixed(2)+'x). Afiná con el calibre.');}
+ if(PIECES[i].type==='face'&&p.m){p.s=TARGET_FACE_H/p.m.h;p.px=(p.img.width/2-p.m.cx)*p.s;p.py=f.h*(PIECES[i].off-0.5)+(p.img.height/2-p.m.cy)*p.s;log(PIECES[i].label+': auto-ajuste aplicado (zoom '+p.s.toFixed(3)+'x).');}
  else{p.s=fitScale(i);p.px=0;p.py=0;}
  sync(i)}
 function handleFile(i,input){if(input.files&&input.files[0]){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=async()=>{P[i].img=img;document.getElementById('zone-'+i).innerHTML='<img src="'+e.target.result+'"><span>Listo</span>';if(PIECES[i].type==='face')P[i].m=await getFaceMetrics(img);applyAuto(i);render()};img.src=e.target.result};r.readAsDataURL(input.files[0])}}
@@ -126,11 +128,9 @@ function render(){const ctx=document.getElementById('sheet-canvas').getContext('
  if(showCal&&P[0].m){const D=P[0].m.h*P[0].s;
   for(const i of[1,2]){const f=PIECES[i].frame;const y=f.y+Math.max(0,Math.min(calY[i],f.h-D));
    ctx.fillStyle='rgba(239,68,68,0.22)';ctx.fillRect(f.x+4,y,f.w-8,D);
-   ctx.strokeStyle='#ef4444';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(f.x+4,y);ctx.lineTo(f.x+f.w-4,y);ctx.moveTo(f.x+4,y+D);ctx.lineTo(f.x+f.w-4,y+D);ctx.stroke();
-   ctx.fillStyle='#ef4444';ctx.font='bold 34px sans-serif';ctx.fillText('BANDA 1:1 = '+Math.round(D)+'px',f.x+20,y+D+50);}}
- ctx.fillStyle='#64748b';ctx.font='bold 40px sans-serif';
- for(let i=0;i<5;i++){const f=PIECES[i].frame;ctx.fillText(PIECES[i].label,f.x+20,f.y+55)}}
-function downloadSheet(){const c=document.getElementById('sheet-canvas');const a=document.createElement('a');a.download='CharacterSheet_Zuppelli_Final.png';a.href=c.toDataURL('image/png');a.click()}
+   ctx.strokeStyle='#ef4444';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(f.x+4,y);ctx.lineTo(f.x+f.w-4,y);ctx.moveTo(f.x+4,y+D);ctx.lineTo(f.x+f.w-4,y+D);ctx.stroke();}}
+}
+function downloadSheet(){const c=document.getElementById('sheet-canvas');const wasCal=showCal;showCal=false;render();const a=document.createElement('a');a.download='CharacterSheet_4K_Flow.png';a.href=c.toDataURL('image/png');a.click();showCal=wasCal;render()}
 function generatePrompts(){const desc=document.getElementById('char-desc').value||'Personaje realista, rasgos detallados';const t=document.getElementById('target-ai').value;const out=document.getElementById('prompts-output');let p1='',p2='';if(t==='mj'){p1=' --ar 3:4 --style raw --cref [URL_REF] --cw 100';p2=' --ar 1:1 --style raw --cref [URL_REF] --cw 100'}else if(t==='flow'){p1=' Fotografía cinematográfica 4K, iluminación de estudio, lente 85mm f/1.8.';p2=' Fotografía de perfil técnico, misma iluminación y vestuario.'}else{p1=' (Use IP-Adapter weight 1.0)';p2=' (Use IP-Adapter weight 1.0)'}
 out.innerText=`
 PROMPT 1 (ANCLA FRONTAL):
