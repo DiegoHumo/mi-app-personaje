@@ -3,36 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ON Custom Images 4K: Flow Optimizer v6 (Modo Zuppelli)</title>
+<title>ON Custom Images 4K: Flow Optimizer v7 (Calibre Digital)</title>
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <style>
 :root{--bg:#0f172a;--card:#1e293b;--accent:#38bdf8;--text:#f8fafc}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:20px}
-.container{max-width:1400px;margin:auto}
+.container{max-width:1700px;margin:auto}
 h1{text-align:center;color:var(--accent)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:20px}
-.drop-zone{background:var(--card);border:2px dashed #475569;border-radius:8px;height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:15px}
+.drop-zone{background:var(--card);border:2px dashed #475569;border-radius:8px;height:140px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden}
 .drop-zone img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;z-index:1}
-.drop-zone span{z-index:2;color:#94a3b8;font-size:13px;pointer-events:none;background:rgba(0,0,0,.5);padding:5px 10px;border-radius:4px}
+.drop-zone span{z-index:2;color:#94a3b8;font-size:12px;pointer-events:none;background:rgba(0,0,0,.5);padding:4px 8px;border-radius:4px}
 input[type=file]{display:none}
-.controls{background:var(--card);padding:20px;border-radius:8px;margin-bottom:20px;display:flex;flex-direction:column;gap:15px}
+.controls{background:var(--card);padding:15px;border-radius:8px;margin-bottom:15px;display:flex;flex-direction:column;gap:12px}
 button{background:var(--accent);color:#0f172a;border:none;padding:12px 20px;border-radius:4px;font-weight:bold;cursor:pointer}
 button:hover{background:#0ea5e9}
-#log{background:#000;color:#10b981;padding:15px;border-radius:4px;font-family:monospace;height:120px;overflow-y:auto;font-size:12px}
-canvas{display:block;margin:auto;max-width:100%;border:1px solid #334155;background:#fff}
+#log{background:#000;color:#10b981;padding:10px;border-radius:4px;font-family:monospace;height:100px;overflow-y:auto;font-size:11px}
+canvas{display:block;width:100%;border:1px solid #334155;background:#fff}
 .prompt-box{background:#000;color:#fff;padding:15px;border-radius:4px;font-family:monospace;white-space:pre-wrap;font-size:11px}
 .input-group{display:flex;gap:10px;flex-wrap:wrap}
-.input-group input,.input-group select{flex:1;min-width:200px;padding:10px;background:#0f172a;border:1px solid #334155;color:#fff;border-radius:4px}
-.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:15px}
-.panel{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:12px;font-size:13px}
-.panel h4{margin:0 0 8px;color:var(--accent);font-size:13px}
-.panel label{display:block;margin-bottom:6px;color:#cbd5e1}
+.input-group input,.input-group select{flex:1;min-width:150px;padding:10px;background:#0f172a;border:1px solid #334155;color:#fff;border-radius:4px}
+.workspace{display:grid;grid-template-columns:400px 1fr;gap:20px;align-items:start}
+.rightcol{position:sticky;top:10px}
+.panel{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:10px;font-size:12px;margin-bottom:10px}
+.panel h4{margin:0 0 6px;color:var(--accent);font-size:12px}
+.panel label{display:block;margin-bottom:4px;color:#cbd5e1}
 .panel input[type=range]{width:100%;accent-color:#38bdf8}
+.calbox{border:2px solid #ef4444;border-radius:8px;padding:10px;background:rgba(239,68,68,.08);font-size:12px}
+.calbox label{display:block;margin-bottom:6px;color:#fecaca}
+.calbox input[type=range]{width:100%;accent-color:#ef4444}
+@media(max-width:1100px){.workspace{grid-template-columns:1fr}.rightcol{position:static}}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>🧠 ON Custom Images 4K: Flow Optimizer v6 (Modo Zuppelli)</h1>
+<h1>🧠 ON Custom Images 4K: Flow Optimizer v7</h1>
 <div class="controls">
 <h3>1. Generador de Prompts Maestros</h3>
 <div class="input-group">
@@ -46,23 +51,40 @@ canvas{display:block;margin:auto;max-width:100%;border:1px solid #334155;backgro
 </div>
 <div id="prompts-output" class="prompt-box" style="display:none"></div>
 </div>
+<div class="workspace">
+<div class="leftcol">
 <div class="controls">
-<h3>2. Cargador + Auto-ajuste + Controles Manuales (Zoom / X / Y)</h3>
-<p>Subí las 5 imágenes: la app las deja calibradas solas. Después mové los sliders de cada panel para acomodarlas al píxel, igual que en la app de Zuppelli.</p>
+<h3>2. Cargar imágenes</h3>
 <div class="grid">
-<label class="drop-zone" id="zone-0"><input type="file" accept="image/*" onchange="handleFile(0,this)"><span>📷 1. Busto Frontal (Ancla)</span></label>
-<label class="drop-zone" id="zone-1"><input type="file" accept="image/*" onchange="handleFile(1,this)"><span>👤 2. Perfil Derecho</span></label>
-<label class="drop-zone" id="zone-2"><input type="file" accept="image/*" onchange="handleFile(2,this)"><span>👤 3. Perfil Izquierdo</span></label>
-<label class="drop-zone" id="zone-3"><input type="file" accept="image/*" onchange="handleFile(3,this)"><span>👕 4. Cuerpo (Sin Cabeza)</span></label>
-<label class="drop-zone" id="zone-4"><input type="file" accept="image/*" onchange="handleFile(4,this)"><span>🎒 5. Espalda (Limpia)</span></label>
+<label class="drop-zone" id="zone-0"><input type="file" accept="image/*" onchange="handleFile(0,this)"><span>1. FRONTAL</span></label>
+<label class="drop-zone" id="zone-1"><input type="file" accept="image/*" onchange="handleFile(1,this)"><span>2. PERFIL DER</span></label>
+<label class="drop-zone" id="zone-2"><input type="file" accept="image/*" onchange="handleFile(2,this)"><span>3. PERFIL IZQ</span></label>
+<label class="drop-zone" id="zone-3"><input type="file" accept="image/*" onchange="handleFile(3,this)"><span>4. CUERPO</span></label>
+<label class="drop-zone" id="zone-4"><input type="file" accept="image/*" onchange="handleFile(4,this)"><span>5. ESPALDA</span></label>
 </div>
-<div class="panels" id="panels"></div>
-<div id="log">[Sistema] Esperando carga de modelos de IA...</div>
+<div id="log">[Sistema] Esperando modelos de IA...</div>
 </div>
-<div class="controls" style="text-align:center">
-<h3>3. Character Sheet Master (Plantilla Zuppelli 3840x2600)</h3>
+<div class="controls">
+<h3>3. 🎯 Calibre Digital 1:1</h3>
+<div class="calbox">
+<label><input type="checkbox" id="calchk" onchange="setCal(this.checked)"> ACTIVAR BANDA ROJA DE REFERENCIA</label>
+<label>↕️ Banda Y en PERFIL DER: <b id="cv1">300</b><input type="range" id="cal1" min="0" max="1200" step="5" value="300" oninput="setCalY(1,this.value)"></label>
+<label>↕️ Banda Y en PERFIL IZQ: <b id="cv2">300</b><input type="range" id="cal2" min="0" max="1200" step="5" value="300" oninput="setCalY(2,this.value)"></label>
+<p style="color:#fecaca;margin:4px 0">La altura de la banda = distancia ojo→mentón del FRONTAL. Mové el Zoom de cada perfil hasta que su cara encaje exactamente dentro de la banda.</p>
+</div>
+</div>
+<div class="controls">
+<h3>4. Controles por pieza (Zoom / X / Y)</h3>
+<div id="panels"></div>
+</div>
+</div>
+<div class="rightcol">
+<div class="controls">
+<h3>Character Sheet (Plantilla Zuppelli)</h3>
 <canvas id="sheet-canvas" width="3840" height="2600"></canvas>
-<button onclick="downloadSheet()" style="margin-top:15px">💾 Descargar PNG</button>
+<button onclick="downloadSheet()" style="margin-top:10px">💾 Descargar PNG Final</button>
+</div>
+</div>
 </div>
 </div>
 <script>
@@ -75,12 +97,15 @@ const PIECES=[
  {label:'5. ESPALDA',type:'fit',frame:{x:3240,y:1300,w:580,h:1260}}
 ];
 const P=PIECES.map(()=>({img:null,m:null,s:1,px:0,py:0}));
+let showCal=false,calY=[0,300,300];
 const log=m=>{const l=document.getElementById('log');l.innerHTML+='<br>'+m;l.scrollTop=l.scrollHeight};
-function buildPanels(){const c=document.getElementById('panels');c.innerHTML=PIECES.map((p,i)=>`
+function setCal(v){showCal=v;render()}
+function setCalY(i,v){calY[i]=+v;document.getElementById('cv'+i).textContent=v;render()}
+function buildPanels(){document.getElementById('panels').innerHTML=PIECES.map((p,i)=>`
 <div class="panel"><h4>🎛️ ${p.label}</h4>
 <label>🔍 Zoom: <b id="z${i}">1.00</b>x<input type="range" id="zi${i}" min="0.4" max="2.5" step="0.01" value="1" oninput="setP(${i},'s',this.value)"></label>
-<label>↔️ Posición X: <b id="x${i}">0</b><input type="range" id="xi${i}" min="-1900" max="1900" step="10" value="0" oninput="setP(${i},'px',this.value)"></label>
-<label>↕️ Posición Y: <b id="y${i}">0</b><input type="range" id="yi${i}" min="-1900" max="1900" step="10" value="0" oninput="setP(${i},'py',this.value)"></label>
+<label>↔️ X: <b id="x${i}">0</b><input type="range" id="xi${i}" min="-1900" max="1900" step="10" value="0" oninput="setP(${i},'px',this.value)"></label>
+<label>↕️ Y: <b id="y${i}">0</b><input type="range" id="yi${i}" min="-1900" max="1900" step="10" value="0" oninput="setP(${i},'py',this.value)"></label>
 </div>`).join('')}
 buildPanels();
 function setP(i,k,v){P[i][k]=parseFloat(v);document.getElementById((k==='s'?'z':k==='px'?'x':'y')+i).textContent=k==='s'?parseFloat(v).toFixed(2):Math.round(v);render()}
@@ -90,14 +115,19 @@ init();
 async function getFaceMetrics(img){const c=document.createElement('canvas');c.width=img.width;c.height=img.height;const x=c.getContext('2d');x.drawImage(img,0,0);const d=await faceapi.detectSingleFace(c,new faceapi.TinyFaceDetectorOptions({inputSize:512,scoreThreshold:0.3})).withFaceLandmarks();if(!d)return null;const p=d.landmarks.positions,t=p[27],b=p[8];return{h:Math.abs(b.y-t.y),cx:(t.x+b.x)/2,cy:(t.y+b.y)/2}}
 function fitScale(i){const f=PIECES[i].frame;return Math.min(f.w/P[i].img.width,f.h/P[i].img.height)}
 function applyAuto(i){const p=P[i],f=PIECES[i].frame;
- if(PIECES[i].type==='face'&&p.m){p.s=TARGET_FACE_H/p.m.h;p.px=(p.img.width/2-p.m.cx)*p.s;p.py=f.h*(PIECES[i].off-0.5)+(p.img.height/2-p.m.cy)*p.s;log(PIECES[i].label+': auto-calibrado 1:1 (zoom '+p.s.toFixed(2)+'x).')}
- else{p.s=fitScale(i);p.px=0;p.py=0;log(PIECES[i].label+': ajustado al recuadro.');}
+ if(PIECES[i].type==='face'&&p.m){p.s=TARGET_FACE_H/p.m.h;p.px=(p.img.width/2-p.m.cx)*p.s;p.py=f.h*(PIECES[i].off-0.5)+(p.img.height/2-p.m.cy)*p.s;log(PIECES[i].label+': auto-ajuste aplicado (zoom '+p.s.toFixed(2)+'x). Afiná con el calibre.');}
+ else{p.s=fitScale(i);p.px=0;p.py=0;}
  sync(i)}
 function handleFile(i,input){if(input.files&&input.files[0]){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=async()=>{P[i].img=img;document.getElementById('zone-'+i).innerHTML='<img src="'+e.target.result+'"><span>Listo</span>';if(PIECES[i].type==='face')P[i].m=await getFaceMetrics(img);applyAuto(i);render()};img.src=e.target.result};r.readAsDataURL(input.files[0])}}
 function render(){const ctx=document.getElementById('sheet-canvas').getContext('2d');ctx.clearRect(0,0,3840,2600);ctx.fillStyle='#f1f5f9';ctx.fillRect(0,0,3840,2600);
  for(let i=0;i<5;i++){const p=P[i];if(!p.img)continue;const f=PIECES[i].frame;const dw=p.img.width*p.s,dh=p.img.height*p.s;
   ctx.save();ctx.beginPath();ctx.rect(f.x,f.y,f.w,f.h);ctx.clip();
   ctx.drawImage(p.img,f.x+f.w/2+p.px-dw/2,f.y+f.h/2+p.py-dh/2,dw,dh);ctx.restore();}
+ if(showCal&&P[0].m){const D=P[0].m.h*P[0].s;
+  for(const i of[1,2]){const f=PIECES[i].frame;const y=f.y+Math.max(0,Math.min(calY[i],f.h-D));
+   ctx.fillStyle='rgba(239,68,68,0.22)';ctx.fillRect(f.x+4,y,f.w-8,D);
+   ctx.strokeStyle='#ef4444';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(f.x+4,y);ctx.lineTo(f.x+f.w-4,y);ctx.moveTo(f.x+4,y+D);ctx.lineTo(f.x+f.w-4,y+D);ctx.stroke();
+   ctx.fillStyle='#ef4444';ctx.font='bold 34px sans-serif';ctx.fillText('BANDA 1:1 = '+Math.round(D)+'px',f.x+20,y+D+50);}}
  ctx.fillStyle='#64748b';ctx.font='bold 40px sans-serif';
  for(let i=0;i<5;i++){const f=PIECES[i].frame;ctx.fillText(PIECES[i].label,f.x+20,f.y+55)}}
 function downloadSheet(){const c=document.getElementById('sheet-canvas');const a=document.createElement('a');a.download='CharacterSheet_Zuppelli_Final.png';a.href=c.toDataURL('image/png');a.click()}
