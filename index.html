@@ -3,38 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ON Custom Images 4K: Flow Optimizer v5</title>
+<title>ON Custom Images 4K: Flow Optimizer v6 (Modo Zuppelli)</title>
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <style>
 :root{--bg:#0f172a;--card:#1e293b;--accent:#38bdf8;--text:#f8fafc}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:20px}
-.container{max-width:1200px;margin:auto}
+.container{max-width:1400px;margin:auto}
 h1{text-align:center;color:var(--accent)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:20px}
-.drop-zone{background:var(--card);border:2px dashed #475569;border-radius:8px;height:250px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden}
+.drop-zone{background:var(--card);border:2px dashed #475569;border-radius:8px;height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden}
 .drop-zone img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;z-index:1}
-.drop-zone span{z-index:2;color:#94a3b8;font-size:14px;pointer-events:none;background:rgba(0,0,0,.5);padding:5px 10px;border-radius:4px}
+.drop-zone span{z-index:2;color:#94a3b8;font-size:13px;pointer-events:none;background:rgba(0,0,0,.5);padding:5px 10px;border-radius:4px}
 input[type=file]{display:none}
 .controls{background:var(--card);padding:20px;border-radius:8px;margin-bottom:20px;display:flex;flex-direction:column;gap:15px}
 button{background:var(--accent);color:#0f172a;border:none;padding:12px 20px;border-radius:4px;font-weight:bold;cursor:pointer}
 button:hover{background:#0ea5e9}
-button:disabled{background:#475569;cursor:not-allowed}
-#log{background:#000;color:#10b981;padding:15px;border-radius:4px;font-family:monospace;height:150px;overflow-y:auto;font-size:12px}
+#log{background:#000;color:#10b981;padding:15px;border-radius:4px;font-family:monospace;height:120px;overflow-y:auto;font-size:12px}
 canvas{display:block;margin:auto;max-width:100%;border:1px solid #334155;background:#fff}
 .prompt-box{background:#000;color:#fff;padding:15px;border-radius:4px;font-family:monospace;white-space:pre-wrap;font-size:11px}
 .input-group{display:flex;gap:10px;flex-wrap:wrap}
 .input-group input,.input-group select{flex:1;min-width:200px;padding:10px;background:#0f172a;border:1px solid #334155;color:#fff;border-radius:4px}
-label.fine{flex:1;min-width:250px;font-size:14px;color:#cbd5e1}
-input[type=range]{width:100%;accent-color:#38bdf8}
+.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:15px}
+.panel{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:12px;font-size:13px}
+.panel h4{margin:0 0 8px;color:var(--accent);font-size:13px}
+.panel label{display:block;margin-bottom:6px;color:#cbd5e1}
+.panel input[type=range]{width:100%;accent-color:#38bdf8}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>🧠 ON Custom Images 4K: Flow Optimizer v5</h1>
+<h1>🧠 ON Custom Images 4K: Flow Optimizer v6 (Modo Zuppelli)</h1>
 <div class="controls">
 <h3>1. Generador de Prompts Maestros</h3>
 <div class="input-group">
-<input type="text" id="char-desc" placeholder="Descripción (ej: Mujer cyberpunk, cabello azul, chaqueta de cuero)">
+<input type="text" id="char-desc" placeholder="Descripción del personaje">
 <select id="target-ai">
 <option value="flow">Google Flow / Veo (Video)</option>
 <option value="mj">Midjourney v6</option>
@@ -45,8 +47,8 @@ input[type=range]{width:100%;accent-color:#38bdf8}
 <div id="prompts-output" class="prompt-box" style="display:none"></div>
 </div>
 <div class="controls">
-<h3>2. Cargador y Auto-Calibrador 1:1 (Cabezas Completas)</h3>
-<p>Sube las 5 imágenes, presiona calibrar, y afina con los sliders si lo deseás.</p>
+<h3>2. Cargador + Auto-ajuste + Controles Manuales (Zoom / X / Y)</h3>
+<p>Subí las 5 imágenes: la app las deja calibradas solas. Después mové los sliders de cada panel para acomodarlas al píxel, igual que en la app de Zuppelli.</p>
 <div class="grid">
 <label class="drop-zone" id="zone-0"><input type="file" accept="image/*" onchange="handleFile(0,this)"><span>📷 1. Busto Frontal (Ancla)</span></label>
 <label class="drop-zone" id="zone-1"><input type="file" accept="image/*" onchange="handleFile(1,this)"><span>👤 2. Perfil Derecho</span></label>
@@ -54,66 +56,51 @@ input[type=range]{width:100%;accent-color:#38bdf8}
 <label class="drop-zone" id="zone-3"><input type="file" accept="image/*" onchange="handleFile(3,this)"><span>👕 4. Cuerpo (Sin Cabeza)</span></label>
 <label class="drop-zone" id="zone-4"><input type="file" accept="image/*" onchange="handleFile(4,this)"><span>🎒 5. Espalda (Limpia)</span></label>
 </div>
-<button id="btn-process" onclick="processAndAssemble()" disabled>⚙️ Calibrar 1:1 y Ensamblar 4K</button>
-<div class="input-group">
-<label class="fine">🎚️ Calibre fino PERFIL DER: <b id="v1">1.00</b>x
-<input type="range" id="fine1" min="0.8" max="1.25" step="0.01" value="1" oninput="setFine(1,this.value)"></label>
-<label class="fine">🎚️ Calibre fino PERFIL IZQ: <b id="v2">1.00</b>x
-<input type="range" id="fine2" min="0.8" max="1.25" step="0.01" value="1" oninput="setFine(2,this.value)"></label>
-</div>
+<div class="panels" id="panels"></div>
 <div id="log">[Sistema] Esperando carga de modelos de IA...</div>
 </div>
 <div class="controls" style="text-align:center">
-<h3>3. Character Sheet Master (4200x4000 - Cabezas Completas)</h3>
-<canvas id="sheet-canvas" width="4200" height="4000"></canvas>
+<h3>3. Character Sheet Master (Plantilla Zuppelli 3840x2600)</h3>
+<canvas id="sheet-canvas" width="3840" height="2600"></canvas>
 <button onclick="downloadSheet()" style="margin-top:15px">💾 Descargar PNG</button>
 </div>
 </div>
 <script>
-const state={images:[null,null,null,null,null],metrics:[null,null,null]};
-const fine=[1,1,1];
-const TARGET_FACE_H=800;
-const FRAMES={
- front:{x:40,y:40,w:1900,h:3920,off:0.60,label:'FRONTAL (ANCLA)'},
- profR:{x:1980,y:40,w:1560,h:1940,off:0.77,label:'PERFIL DER'},
- profL:{x:1980,y:2020,w:1560,h:1940,off:0.77,label:'PERFIL IZQ'},
- bodyF:{x:3580,y:40,w:580,h:1940,label:'CUERPO FRENTE'},
- bodyB:{x:3580,y:2020,w:580,h:1940,label:'ESPALDA'}
-};
+const TARGET_FACE_H=600;
+const PIECES=[
+ {label:'1. FRONTAL (ANCLA)',type:'face',off:0.58,frame:{x:20,y:20,w:1780,h:2560}},
+ {label:'2. PERFIL DER',type:'face',off:0.60,frame:{x:1820,y:20,w:1400,h:1260}},
+ {label:'3. PERFIL IZQ',type:'face',off:0.60,frame:{x:1820,y:1300,w:1400,h:1260}},
+ {label:'4. CUERPO FRENTE',type:'fit',frame:{x:3240,y:20,w:580,h:1260}},
+ {label:'5. ESPALDA',type:'fit',frame:{x:3240,y:1300,w:580,h:1260}}
+];
+const P=PIECES.map(()=>({img:null,m:null,s:1,px:0,py:0}));
 const log=m=>{const l=document.getElementById('log');l.innerHTML+='<br>'+m;l.scrollTop=l.scrollHeight};
-async function init(){try{const U='https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';await faceapi.nets.tinyFaceDetector.loadFromUri(U);await faceapi.nets.faceLandmark68Net.loadFromUri(U);log('[Éxito] Modelos de Visión por Computadora cargados.')}catch(e){log('[Error] No se pudieron cargar los modelos. Usa Live Server o HTTPS.')}}
+function buildPanels(){const c=document.getElementById('panels');c.innerHTML=PIECES.map((p,i)=>`
+<div class="panel"><h4>🎛️ ${p.label}</h4>
+<label>🔍 Zoom: <b id="z${i}">1.00</b>x<input type="range" id="zi${i}" min="0.4" max="2.5" step="0.01" value="1" oninput="setP(${i},'s',this.value)"></label>
+<label>↔️ Posición X: <b id="x${i}">0</b><input type="range" id="xi${i}" min="-1900" max="1900" step="10" value="0" oninput="setP(${i},'px',this.value)"></label>
+<label>↕️ Posición Y: <b id="y${i}">0</b><input type="range" id="yi${i}" min="-1900" max="1900" step="10" value="0" oninput="setP(${i},'py',this.value)"></label>
+</div>`).join('')}
+buildPanels();
+function setP(i,k,v){P[i][k]=parseFloat(v);document.getElementById((k==='s'?'z':k==='px'?'x':'y')+i).textContent=k==='s'?parseFloat(v).toFixed(2):Math.round(v);render()}
+function sync(i){document.getElementById('zi'+i).value=P[i].s;document.getElementById('xi'+i).value=P[i].px;document.getElementById('yi'+i).value=P[i].py;document.getElementById('z'+i).textContent=P[i].s.toFixed(2);document.getElementById('x'+i).textContent=Math.round(P[i].px);document.getElementById('y'+i).textContent=Math.round(P[i].py)}
+async function init(){try{const U='https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';await faceapi.nets.tinyFaceDetector.loadFromUri(U);await faceapi.nets.faceLandmark68Net.loadFromUri(U);log('[Éxito] Modelos de IA cargados.')}catch(e){log('[Error] No se pudieron cargar los modelos.')}}
 init();
-function handleFile(i,input){if(input.files&&input.files[0]){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=()=>{state.images[i]=img;document.getElementById('zone-'+i).innerHTML='<img src="'+e.target.result+'"><span>Listo</span>';checkReady()};img.src=e.target.result};r.readAsDataURL(input.files[0])}}
-function checkReady(){if(state.images[0]&&state.images[1]&&state.images[2])document.getElementById('btn-process').disabled=false}
-function setFine(i,v){fine[i]=parseFloat(v);document.getElementById('v'+i).textContent=parseFloat(v).toFixed(2);if(state.metrics[0])render()}
 async function getFaceMetrics(img){const c=document.createElement('canvas');c.width=img.width;c.height=img.height;const x=c.getContext('2d');x.drawImage(img,0,0);const d=await faceapi.detectSingleFace(c,new faceapi.TinyFaceDetectorOptions({inputSize:512,scoreThreshold:0.3})).withFaceLandmarks();if(!d)return null;const p=d.landmarks.positions,t=p[27],b=p[8];return{h:Math.abs(b.y-t.y),cx:(t.x+b.x)/2,cy:(t.y+b.y)/2}}
-function drawFaceInFrame(img,m,frame,f){const ctx=document.getElementById('sheet-canvas').getContext('2d');const s=(TARGET_FACE_H/m.h)*(f||1);const off=frame.off||0.62;ctx.save();ctx.beginPath();ctx.rect(frame.x,frame.y,frame.w,frame.h);ctx.clip();const dw=img.width*s,dh=img.height*s;ctx.drawImage(img,frame.x+frame.w/2-m.cx*s,frame.y+frame.h*off-m.cy*s,dw,dh);ctx.restore();return s}
-function drawFitInFrame(img,frame){const ctx=document.getElementById('sheet-canvas').getContext('2d');const s=Math.min(frame.w/img.width,frame.h/img.height);const dw=img.width*s,dh=img.height*s;ctx.drawImage(img,frame.x+(frame.w-dw)/2,frame.y+(frame.h-dh)/2,dw,dh)}
-function drawLabels(){const ctx=document.getElementById('sheet-canvas').getContext('2d');ctx.fillStyle='#64748b';ctx.font='bold 40px sans-serif';for(const k in FRAMES){const f=FRAMES[k];ctx.fillText(f.label,f.x+20,f.y+55)}}
-function render(){
- const ctx=document.getElementById('sheet-canvas').getContext('2d');
- ctx.clearRect(0,0,4200,4000);ctx.fillStyle='#f1f5f9';ctx.fillRect(0,0,4200,4000);
- const m0=state.metrics[0];
- drawFaceInFrame(state.images[0],m0,FRAMES.front,1);
- if(state.metrics[1])drawFaceInFrame(state.images[1],state.metrics[1],FRAMES.profR,fine[1]);else if(state.images[1])drawFitInFrame(state.images[1],FRAMES.profR);
- if(state.metrics[2])drawFaceInFrame(state.images[2],state.metrics[2],FRAMES.profL,fine[2]);else if(state.images[2])drawFitInFrame(state.images[2],FRAMES.profL);
- if(state.images[3])drawFitInFrame(state.images[3],FRAMES.bodyF);
- if(state.images[4])drawFitInFrame(state.images[4],FRAMES.bodyB);
- drawLabels();
-}
-async function processAndAssemble(){
- log('Procesando... calculando métricas faciales...');
- state.metrics[0]=await getFaceMetrics(state.images[0]);
- if(!state.metrics[0]){log('[Error] No se detectó rostro en el Ancla Frontal.');return}
- log('Ancla Frontal: altura facial calibrada a '+TARGET_FACE_H+'px.');
- state.metrics[1]=await getFaceMetrics(state.images[1]);
- state.metrics[2]=await getFaceMetrics(state.images[2]);
- log('Perfil Der: '+(state.metrics[1]?'detectado y calibrado 1:1.':'no detectado, usa el slider.'));
- log('Perfil Izq: '+(state.metrics[2]?'detectado y calibrado 1:1.':'no detectado, usa el slider.'));
- render();
- log('¡Ensamblaje completado! Cabezas completas + escala 1:1. Descargá tu hoja.');
-}
-function downloadSheet(){const c=document.getElementById('sheet-canvas');const a=document.createElement('a');a.download='CharacterSheet_4K_Flow.png';a.href=c.toDataURL('image/png');a.click()}
+function fitScale(i){const f=PIECES[i].frame;return Math.min(f.w/P[i].img.width,f.h/P[i].img.height)}
+function applyAuto(i){const p=P[i],f=PIECES[i].frame;
+ if(PIECES[i].type==='face'&&p.m){p.s=TARGET_FACE_H/p.m.h;p.px=(p.img.width/2-p.m.cx)*p.s;p.py=f.h*(PIECES[i].off-0.5)+(p.img.height/2-p.m.cy)*p.s;log(PIECES[i].label+': auto-calibrado 1:1 (zoom '+p.s.toFixed(2)+'x).')}
+ else{p.s=fitScale(i);p.px=0;p.py=0;log(PIECES[i].label+': ajustado al recuadro.');}
+ sync(i)}
+function handleFile(i,input){if(input.files&&input.files[0]){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=async()=>{P[i].img=img;document.getElementById('zone-'+i).innerHTML='<img src="'+e.target.result+'"><span>Listo</span>';if(PIECES[i].type==='face')P[i].m=await getFaceMetrics(img);applyAuto(i);render()};img.src=e.target.result};r.readAsDataURL(input.files[0])}}
+function render(){const ctx=document.getElementById('sheet-canvas').getContext('2d');ctx.clearRect(0,0,3840,2600);ctx.fillStyle='#f1f5f9';ctx.fillRect(0,0,3840,2600);
+ for(let i=0;i<5;i++){const p=P[i];if(!p.img)continue;const f=PIECES[i].frame;const dw=p.img.width*p.s,dh=p.img.height*p.s;
+  ctx.save();ctx.beginPath();ctx.rect(f.x,f.y,f.w,f.h);ctx.clip();
+  ctx.drawImage(p.img,f.x+f.w/2+p.px-dw/2,f.y+f.h/2+p.py-dh/2,dw,dh);ctx.restore();}
+ ctx.fillStyle='#64748b';ctx.font='bold 40px sans-serif';
+ for(let i=0;i<5;i++){const f=PIECES[i].frame;ctx.fillText(PIECES[i].label,f.x+20,f.y+55)}}
+function downloadSheet(){const c=document.getElementById('sheet-canvas');const a=document.createElement('a');a.download='CharacterSheet_Zuppelli_Final.png';a.href=c.toDataURL('image/png');a.click()}
 function generatePrompts(){const desc=document.getElementById('char-desc').value||'Personaje realista, rasgos detallados';const t=document.getElementById('target-ai').value;const out=document.getElementById('prompts-output');let p1='',p2='';if(t==='mj'){p1=' --ar 3:4 --style raw --cref [URL_REF] --cw 100';p2=' --ar 1:1 --style raw --cref [URL_REF] --cw 100'}else if(t==='flow'){p1=' Fotografía cinematográfica 4K, iluminación de estudio, lente 85mm f/1.8.';p2=' Fotografía de perfil técnico, misma iluminación y vestuario.'}else{p1=' (Use IP-Adapter weight 1.0)';p2=' (Use IP-Adapter weight 1.0)'}
 out.innerText=`
 PROMPT 1 (ANCLA FRONTAL):
