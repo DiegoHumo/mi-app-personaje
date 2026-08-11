@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ON Custom Images 4K: Flow Optimizer v2</title>
+<title>ON Custom Images 4K: Flow Optimizer v2.1</title>
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <style>
 :root{--bg:#0f172a;--card:#1e293b;--accent:#38bdf8;--text:#f8fafc}
@@ -28,7 +28,7 @@ canvas{display:block;margin:auto;max-width:100%;border:1px solid #334155;backgro
 </head>
 <body>
 <div class="container">
-<h1>🧠 ON Custom Images 4K: Flow Optimizer v2</h1>
+<h1>🧠 ON Custom Images 4K: Flow Optimizer v2.1</h1>
 <div class="controls">
 <h3>1. Generador de Prompts Maestros</h3>
 <div class="input-group">
@@ -57,7 +57,7 @@ canvas{display:block;margin:auto;max-width:100%;border:1px solid #334155;backgro
 </div>
 <div class="controls" style="text-align:center">
 <h3>3. Character Sheet Master (4K)</h3>
-<canvas id="sheet-canvas" width="3840" height="2160"></canvas>
+<canvas id="sheet-canvas" width="3840" height="3000"></canvas>
 <button onclick="downloadSheet()" style="margin-top:15px">💾 Descargar PNG 4K</button>
 </div>
 </div>
@@ -68,8 +68,8 @@ const FRAMES={
  profL:{x:60,y:40,w:1160,h:1000,label:'PERFIL IZQUIERDO'},
  front:{x:1340,y:40,w:1160,h:1000,label:'FRONTAL (ANCLA)'},
  profR:{x:2620,y:40,w:1160,h:1000,label:'PERFIL DERECHO'},
- bodyF:{x:60,y:1080,w:1830,h:1040,label:'CUERPO FRONTAL (SIN CABEZA)'},
- bodyB:{x:1950,y:1080,w:1830,h:1040,label:'ESPALDA LIMPIA'}
+ bodyF:{x:60,y:1080,w:1830,h:1880,label:'CUERPO FRONTAL (SIN CABEZA)'},
+ bodyB:{x:1950,y:1080,w:1830,h:1880,label:'ESPALDA LIMPIA'}
 };
 const log=m=>{const l=document.getElementById('log');l.innerHTML+='<br>'+m;l.scrollTop=l.scrollHeight};
 async function init(){try{const U='https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';await faceapi.nets.tinyFaceDetector.loadFromUri(U);await faceapi.nets.faceLandmark68Net.loadFromUri(U);log('[Éxito] Modelos de Visión por Computadora cargados.')}catch(e){log('[Error] No se pudieron cargar los modelos. Usa Live Server o HTTPS.')}}
@@ -83,7 +83,7 @@ function drawLabels(){const ctx=document.getElementById('sheet-canvas').getConte
 async function processAndAssemble(){
  log('Procesando... calculando métricas faciales...');
  const ctx=document.getElementById('sheet-canvas').getContext('2d');
- ctx.clearRect(0,0,3840,2160);ctx.fillStyle='#f1f5f9';ctx.fillRect(0,0,3840,2160);
+ ctx.clearRect(0,0,3840,3000);ctx.fillStyle='#f1f5f9';ctx.fillRect(0,0,3840,3000);
  const m0=await getFaceMetrics(state.images[0]);
  if(!m0){log('[Error] No se detectó rostro en el Ancla Frontal.');return}
  log('Ancla Frontal: altura facial calibrada a '+TARGET_FACE_H+'px en la hoja.');
