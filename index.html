@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ON Custom Images 4K: Constructor HRP</title>
+<title>ON Custom Images 4K: Constructor HRP v10</title>
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <style>
 :root{--bg:#0f172a;--card:#1e293b;--accent:#38bdf8;--text:#f8fafc}
@@ -29,7 +29,7 @@ canvas{display:block;width:100%;border:1px solid #334155;background:#fff;cursor:
 </head>
 <body>
 <div class="container">
-<h1>🧠 ON Custom Images 4K: Constructor HRP</h1>
+<h1>🧠 ON Custom Images 4K: Constructor HRP v10</h1>
 <div class="controls">
 <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
 <input type="text" id="char-desc" placeholder="Descripción del personaje (ej: Vera, pelirroja...)" style="flex:1">
@@ -43,7 +43,7 @@ canvas{display:block;width:100%;border:1px solid #334155;background:#fff;cursor:
 <div class="workspace">
 <div class="leftcol">
 <div class="controls calbox">
-<label><input type="checkbox" id="calchk" onchange="setCal(this.checked)"> 🎯 BANDA ROJA 1:1 (altura = cara del primer módulo calibrado)</label>
+<label><input type="checkbox" id="calchk" onchange="setCal(this.checked)"> 🎯 BANDA ROJA 1:1</label>
 <label>↕️ Posición Y de la banda: <b id="cvy">300</b><input type="range" min="0" max="2000" step="5" value="300" oninput="setCalY(this.value)" style="accent-color:#ef4444"></label>
 </div>
 <div class="controls">
@@ -53,7 +53,7 @@ canvas{display:block;width:100%;border:1px solid #334155;background:#fff;cursor:
 </div>
 <div class="rightcol">
 <div class="controls">
-<h3 style="margin:0">Lienzo 4K — arrastrá los módulos, zoom con rueda</h3>
+<h3 style="margin:0">Lienzo 4K fijo — arrastrá recuadros, rueda = zoom de imagen</h3>
 <canvas id="sheet-canvas" width="3840" height="2160"></canvas>
 </div>
 </div>
@@ -61,18 +61,18 @@ canvas{display:block;width:100%;border:1px solid #334155;background:#fff;cursor:
 </div>
 <script>
 const TYPES=[
-{n:'Busto Frontal (Ancla)',f:1,p:'Exact 1:1 physical clone of [P], front bust portrait, maximum skin texture, pores, freckles, neutral light gray studio background, 85mm lens, raw photograph.'},
-{n:'Perfil Derecho 90°',f:1,p:'Exact 1:1 physical clone of [P], right side profile 90 degrees, jawline and ear alignment, neutral gray studio background, raw photograph.'},
-{n:'Perfil Izquierdo 90°',f:1,p:'Exact 1:1 physical clone of [P], left side profile 90 degrees, skull structure, neutral gray studio background, raw photograph.'},
-{n:'Vista 3/4 Derecha',f:1,p:'Exact 1:1 physical clone of [P], three-quarter view turned 45 degrees right, neutral gray studio background, raw photograph.'},
-{n:'Vista 3/4 Izquierda',f:1,p:'Exact 1:1 physical clone of [P], three-quarter view turned 45 degrees left, neutral gray studio background, raw photograph.'},
-{n:'Busto Espalda',f:0,p:'Exact clone of [P], back of head and shoulders, full hair volume, neutral gray studio background, raw photograph.'},
-{n:'Cuerpo Frente (sin cabeza)',f:0,p:'NO HEAD, NO NECK. Headless full body front view of [P], clean crop at collar seam, neutral pose, outfit strictly matching reference.'},
-{n:'Cuerpo Espalda',f:0,p:'Full body back view of [P], no backpack, back of exact outfit, neutral gray studio background.'},
-{n:'Cuerpo Perfil (lado)',f:0,p:'Full body side profile view of [P], complete outfit and footwear, neutral gray studio background.'},
-{n:'Panel 6 Expresiones',f:0,p:'Grid of 6 key expressions of [P]: neutral, joy, anger, sadness, surprise, disgust. Same exact face in all, neutral gray background.'},
-{n:'Macro Ojos e Iris',f:0,p:'Extreme macro of both eyes of [P], iris texture, eyelashes, micro-detail, raw photograph.'},
-{n:'Macro Manos',f:0,p:'Close-up of both hands of [P] relaxed, anatomically correct fingers, nails, rings, raw photograph.'}];
+{n:'Busto Frontal (Ancla)',f:1,fw:1100,fh:1400,p:'Exact 1:1 physical clone of [P], front bust portrait, maximum skin texture, pores, freckles, neutral light gray studio background, 85mm lens, raw photograph.'},
+{n:'Perfil Derecho 90°',f:1,fw:1000,fh:1000,p:'Exact 1:1 physical clone of [P], right side profile 90 degrees, jawline and ear alignment, neutral gray studio background, raw photograph.'},
+{n:'Perfil Izquierdo 90°',f:1,fw:1000,fh:1000,p:'Exact 1:1 physical clone of [P], left side profile 90 degrees, skull structure, neutral gray studio background, raw photograph.'},
+{n:'Vista 3/4 Derecha',f:1,fw:1000,fh:1200,p:'Exact 1:1 physical clone of [P], three-quarter view turned 45 degrees right, neutral gray studio background, raw photograph.'},
+{n:'Vista 3/4 Izquierda',f:1,fw:1000,fh:1200,p:'Exact 1:1 physical clone of [P], three-quarter view turned 45 degrees left, neutral gray studio background, raw photograph.'},
+{n:'Busto Espalda',f:0,fw:1000,fh:1200,p:'Exact clone of [P], back of head and shoulders, full hair volume, neutral gray studio background, raw photograph.'},
+{n:'Cuerpo Frente (sin cabeza)',f:0,fw:700,fh:1500,p:'NO HEAD, NO NECK. Headless full body front view of [P], clean crop at collar seam, neutral pose, outfit strictly matching reference.'},
+{n:'Cuerpo Espalda',f:0,fw:700,fh:1500,p:'Full body back view of [P], no backpack, back of exact outfit, neutral gray studio background.'},
+{n:'Cuerpo Perfil (lado)',f:0,fw:700,fh:1500,p:'Full body side profile view of [P], complete outfit and footwear, neutral gray studio background.'},
+{n:'Panel 6 Expresiones',f:0,fw:1400,fh:900,p:'Grid of 6 key expressions of [P]: neutral, joy, anger, sadness, surprise, disgust. Same exact face in all, neutral gray background.'},
+{n:'Macro Ojos e Iris',f:0,fw:900,fh:600,p:'Extreme macro of both eyes of [P], iris texture, eyelashes, micro-detail, raw photograph.'},
+{n:'Macro Manos',f:0,fw:900,fh:700,p:'Close-up of both hands of [P] relaxed, anatomically correct fingers, nails, rings, raw photograph.'}];
 let mods=[],sel=-1,drag=null,guides={x:null,y:null},cloneSrc=-1,showCal=false,calY=300;
 const cv=document.getElementById('sheet-canvas'),ctx=cv.getContext('2d');
 document.getElementById('addsel').innerHTML=TYPES.map((t,i)=>`<option value="${i}">${t.n}</option>`).join('');
@@ -81,12 +81,16 @@ function setCal(v){showCal=v;render()}
 function setCalY(v){calY=+v;document.getElementById('cvy').textContent=v;render()}
 async function init(){try{const U='https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';await faceapi.nets.tinyFaceDetector.loadFromUri(U);await faceapi.nets.faceLandmark68Net.loadFromUri(U);log('[Éxito] IA cargada.')}catch(e){log('[Error] modelos IA.')}}
 init();
-function addMod(){mods.push({t:+document.getElementById('addsel').value,img:null,s:0.5,x:150+mods.length*90,y:120+mods.length*70,m:null});buildPanels();render();log('Módulo añadido: '+TYPES[mods[mods.length-1].t].n)}
+function addMod(){const t=+document.getElementById('addsel').value;mods.push({t,img:null,m:null,s:0.5,ox:0,oy:0,x:150+mods.length*90,y:120+mods.length*70,w:TYPES[t].fw,h:TYPES[t].fh});buildPanels();render();log('Módulo añadido: '+TYPES[t].n)}
 function buildPanels(){document.getElementById('panels').innerHTML=mods.map((mo,i)=>`
 <div class="panel"><h4>🎛️ M${i+1} — ${TYPES[mo.t].n}</h4>
 <input type="file" accept="image/*" onchange="loadMod(${i},this)">
-<label>🔍 Zoom: <b id="mz${i}">${mo.s.toFixed(3)}</b>x<input type="range" id="mi${i}" min="0.05" max="3" step="0.005" value="${mo.s}" oninput="setMS(${i},this.value)"></label>
-<button onclick="cloneSrc=${i};log('Tamaño de M${i+1} listo para clonar.')">= Fuente</button>
+<label>🔍 Zoom imagen: <b id="z${i}">${mo.s.toFixed(3)}</b>x<input type="range" id="zi${i}" min="0.05" max="3" step="0.005" value="${mo.s}" oninput="setM(${i},'s',this.value)"></label>
+<label>↔️ Encuadre X: <b id="x${i}">${Math.round(mo.ox)}</b><input type="range" id="xi${i}" min="-1500" max="1500" step="2" value="${mo.ox}" oninput="setM(${i},'ox',this.value)"></label>
+<label>↕️ Encuadre Y: <b id="y${i}">${Math.round(mo.oy)}</b><input type="range" id="yi${i}" min="-1500" max="1500" step="2" value="${mo.oy}" oninput="setM(${i},'oy',this.value)"></label>
+<label>⬛ Ancho recuadro: <b id="w${i}">${mo.w}</b><input type="range" id="wi${i}" min="200" max="2400" step="10" value="${mo.w}" oninput="setM(${i},'w',this.value)"></label>
+<label>⬛ Alto recuadro: <b id="h${i}">${mo.h}</b><input type="range" id="hi${i}" min="200" max="2100" step="10" value="${mo.h}" oninput="setM(${i},'h',this.value)"></label>
+<button onclick="cloneSrc=${i};log('Tamaño de recuadro M${i+1} listo para clonar.')">= Fuente</button>
 <button onclick="applyClone(${i})">📏 Pegar tamaño</button>
 <button onclick="delMod(${i})">🗑️</button>
 <div class="prompt-box" id="pp${i}"></div><button onclick="copyP(${i})">📋 Copiar prompt</button>
@@ -94,24 +98,25 @@ function buildPanels(){document.getElementById('panels').innerHTML=mods.map((mo,
 function updPrompt(i){const el=document.getElementById('pp'+i);if(el)el.textContent=TYPES[mods[i].t].p.replace('[P]',document.getElementById('char-desc').value||'the reference character')}
 function copyP(i){updPrompt(i);navigator.clipboard.writeText(document.getElementById('pp'+i).textContent);log('Prompt copiado.')}
 document.getElementById('char-desc').addEventListener('input',()=>mods.forEach((m,i)=>updPrompt(i)));
-function setMS(i,v){mods[i].s=+v;document.getElementById('mz'+i).textContent=(+v).toFixed(3);render()}
-function applyClone(i){if(cloneSrc<0||!mods[cloneSrc].img||!mods[i].img)return;const tw=mods[cloneSrc].img.width*mods[cloneSrc].s;mods[i].s=tw/mods[i].img.width;document.getElementById('mi'+i).value=mods[i].s;document.getElementById('mz'+i).textContent=mods[i].s.toFixed(3);render();log('Tamaño clonado a M'+(i+1))}
+function setM(i,k,v){mods[i][k]=parseFloat(v);sync(i);render()}
+function sync(i){const mo=mods[i];document.getElementById('zi'+i).value=mo.s;document.getElementById('xi'+i).value=mo.ox;document.getElementById('yi'+i).value=mo.oy;document.getElementById('wi'+i).value=mo.w;document.getElementById('hi'+i).value=mo.h;document.getElementById('z'+i).textContent=mo.s.toFixed(3);document.getElementById('x'+i).textContent=Math.round(mo.ox);document.getElementById('y'+i).textContent=Math.round(mo.oy);document.getElementById('w'+i).textContent=Math.round(mo.w);document.getElementById('h'+i).textContent=Math.round(mo.h)}
+function applyClone(i){if(cloneSrc<0)return;mods[i].w=mods[cloneSrc].w;mods[i].h=mods[cloneSrc].h;sync(i);render();log('Tamaño de recuadro clonado a M'+(i+1))}
 function delMod(i){mods.splice(i,1);sel=-1;cloneSrc=-1;buildPanels();render()}
-function loadMod(i,input){if(!input.files[0])return;const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=async()=>{mods[i].img=img;if(TYPES[mods[i].t].f){mods[i].m=await getFaceMetrics(img);if(mods[i].m){mods[i].s=600/mods[i].m.h;log('M'+(i+1)+' auto-calibrado 1:1.')}}else{mods[i].s=Math.min(1200/img.height,1)}document.getElementById('mi'+i).value=mods[i].s;document.getElementById('mz'+i).textContent=mods[i].s.toFixed(3);render()};img.src=e.target.result};r.readAsDataURL(input.files[0])}
-async function getFaceMetrics(img){const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);const d=await faceapi.detectSingleFace(c,new faceapi.TinyFaceDetectorOptions({inputSize:512,scoreThreshold:0.3})).withFaceLandmarks();if(!d)return null;const p=d.landmarks.positions,t=p[27],b=p[8];return{h:Math.abs(b.y-t.y)}}
-function autoCal(){let n=0;mods.forEach((mo,i)=>{if(mo.img&&mo.m&&TYPES[mo.t].f){mo.s=600/mo.m.h;document.getElementById('mi'+i).value=mo.s;document.getElementById('mz'+i).textContent=mo.s.toFixed(3);n++}});render();log('Caras calibradas 1:1: '+n)}
+function loadMod(i,input){if(!input.files[0])return;const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=async()=>{mods[i].img=img;const mo=mods[i];if(TYPES[mo.t].f){mo.m=await getFaceMetrics(img);if(mo.m){mo.s=600/mo.m.h;mo.ox=(img.width/2-mo.m.cx)*mo.s;mo.oy=(img.height/2-mo.m.cy)*mo.s;log('M'+(i+1)+' auto-calibrado y centrado.')}}else{mo.s=Math.min(mo.w/img.width,mo.h/img.height);mo.ox=0;mo.oy=0}sync(i);render()};img.src=e.target.result};r.readAsDataURL(input.files[0])}
+async function getFaceMetrics(img){const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);const d=await faceapi.detectSingleFace(c,new faceapi.TinyFaceDetectorOptions({inputSize:512,scoreThreshold:0.3})).withFaceLandmarks();if(!d)return null;const p=d.landmarks.positions,t=p[27],b=p[8];return{h:Math.abs(b.y-t.y),cx:(t.x+b.x)/2,cy:(t.y+b.y)/2}}
+function autoCal(){let n=0;mods.forEach((mo,i)=>{if(mo.img&&mo.m&&TYPES[mo.t].f){mo.s=600/mo.m.h;mo.ox=(mo.img.width/2-mo.m.cx)*mo.s;mo.oy=(mo.img.height/2-mo.m.cy)*mo.s;sync(i);n++}});render();log('Caras calibradas 1:1: '+n)}
 function cPos(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*(cv.width/r.width),y:(e.clientY-r.top)*(cv.height/r.height)}}
-cv.addEventListener('mousedown',e=>{const p=cPos(e);drag=null;for(let i=mods.length-1;i>=0;i--){const mo=mods[i];if(!mo.img)continue;const w=mo.img.width*mo.s,h=mo.img.height*mo.s;if(p.x>=mo.x&&p.x<=mo.x+w&&p.y>=mo.y&&p.y<=mo.y+h){sel=i;drag={i,ox:p.x-mo.x,oy:p.y-mo.y};break}}if(!drag)sel=-1;render()});
-cv.addEventListener('mousemove',e=>{if(!drag)return;const p=cPos(e),mo=mods[drag.i],w=mo.img.width*mo.s,h=mo.img.height*mo.s;let nx=p.x-drag.ox,ny=p.y-drag.oy;guides={x:null,y:null};const cx=nx+w/2,cy=ny+h/2;const tx=[cv.width/2],ty=[cv.height/2];mods.forEach((o,j)=>{if(j!==drag.i&&o.img){const ow=o.img.width*o.s,oh=o.img.height*o.s;tx.push(o.x+ow/2,o.x,o.x+ow);ty.push(o.y+oh/2,o.y,o.y+oh)}});for(const v of tx){if(Math.abs(cx-v)<30){nx=v-w/2;guides.x=v;break}}for(const v of ty){if(Math.abs(cy-v)<30){ny=v-h/2;guides.y=v;break}}mo.x=nx;mo.y=ny;render()});
+cv.addEventListener('mousedown',e=>{const p=cPos(e);drag=null;for(let i=mods.length-1;i>=0;i--){const mo=mods[i];if(p.x>=mo.x&&p.x<=mo.x+mo.w&&p.y>=mo.y&&p.y<=mo.y+mo.h){sel=i;drag={i,ox:p.x-mo.x,oy:p.y-mo.y};break}}if(!drag)sel=-1;render()});
+cv.addEventListener('mousemove',e=>{if(!drag)return;const p=cPos(e),mo=mods[drag.i];let nx=p.x-drag.ox,ny=p.y-drag.oy;guides={x:null,y:null};const cx=nx+mo.w/2,cy=ny+mo.h/2;const tx=[cv.width/2],ty=[cv.height/2];mods.forEach((o,j)=>{if(j!==drag.i){tx.push(o.x+o.w/2,o.x,o.x+o.w);ty.push(o.y+o.h/2,o.y,o.y+o.h)}});for(const v of tx){if(Math.abs(cx-v)<30){nx=v-mo.w/2;guides.x=v;break}}for(const v of ty){if(Math.abs(cy-v)<30){ny=v-mo.h/2;guides.y=v;break}}mo.x=nx;mo.y=ny;render()});
 window.addEventListener('mouseup',()=>{drag=null;guides={x:null,y:null};render()});
-cv.addEventListener('wheel',e=>{const p=cPos(e);for(let i=mods.length-1;i>=0;i--){const mo=mods[i];if(!mo.img)continue;const w=mo.img.width*mo.s,h=mo.img.height*mo.s;if(p.x>=mo.x&&p.x<=mo.x+w&&p.y>=mo.y&&p.y<=mo.y+h){e.preventDefault();mo.s*=e.deltaY<0?1.05:0.95;document.getElementById('mi'+i).value=mo.s;document.getElementById('mz'+i).textContent=mo.s.toFixed(3);render();break}}},{passive:false});
+cv.addEventListener('wheel',e=>{const p=cPos(e);for(let i=mods.length-1;i>=0;i--){const mo=mods[i];if(p.x>=mo.x&&p.x<=mo.x+mo.w&&p.y>=mo.y&&p.y<=mo.y+mo.h){e.preventDefault();mo.s*=e.deltaY<0?1.05:0.95;sync(i);render();break}}},{passive:false});
 function render(){ctx.clearRect(0,0,3840,2160);ctx.fillStyle='#f1f5f9';ctx.fillRect(0,0,3840,2160);
- mods.forEach((mo,i)=>{if(!mo.img)return;const w=mo.img.width*mo.s,h=mo.img.height*mo.s;ctx.drawImage(mo.img,mo.x,mo.y,w,h);if(i===sel){ctx.strokeStyle='#38bdf8';ctx.lineWidth=8;ctx.strokeRect(mo.x,mo.y,w,h)}});
+ mods.forEach((mo,i)=>{if(!mo.img)return;ctx.save();ctx.beginPath();ctx.rect(mo.x,mo.y,mo.w,mo.h);ctx.clip();const dw=mo.img.width*mo.s,dh=mo.img.height*mo.s;ctx.drawImage(mo.img,mo.x+mo.w/2+mo.ox-dw/2,mo.y+mo.h/2+mo.oy-dh/2,dw,dh);ctx.restore();if(i===sel){ctx.strokeStyle='#38bdf8';ctx.lineWidth=8;ctx.strokeRect(mo.x,mo.y,mo.w,mo.h)}});
  if(drag){ctx.strokeStyle='#facc15';ctx.lineWidth=5;ctx.setLineDash([20,15]);if(guides.x){ctx.beginPath();ctx.moveTo(guides.x,0);ctx.lineTo(guides.x,2160);ctx.stroke()}if(guides.y){ctx.beginPath();ctx.moveTo(0,guides.y);ctx.lineTo(3840,guides.y);ctx.stroke()}ctx.setLineDash([])}
  if(showCal){const fm=mods.find(mo=>mo.m&&mo.img);if(fm){const D=fm.m.h*fm.s;ctx.fillStyle='rgba(239,68,68,0.22)';ctx.fillRect(0,calY,3840,D);ctx.strokeStyle='#ef4444';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(0,calY);ctx.lineTo(3840,calY);ctx.moveTo(0,calY+D);ctx.lineTo(3840,calY+D);ctx.stroke()}}
  const op=+document.getElementById('lblop').value/100,txt=document.getElementById('lbl').value;
  if(op>0&&txt){ctx.globalAlpha=op;ctx.fillStyle='#334155';ctx.font='bold 70px sans-serif';ctx.textAlign='center';ctx.fillText(txt,1920,120);ctx.textAlign='left';ctx.globalAlpha=1}}
-function downloadSheet(){const s=sel,d=drag;sel=-1;drag=null;const sc=showCal;showCal=false;render();const a=document.createElement('a');a.download='Hoja_Personaje_4K.png';a.href=cv.toDataURL('image/png');a.click();showCal=sc;sel=s;render()}
+function downloadSheet(){const s=sel;sel=-1;const sc=showCal;showCal=false;render();const a=document.createElement('a');a.download='Hoja_Personaje_4K.png';a.href=cv.toDataURL('image/png');a.click();showCal=sc;sel=s;render()}
 </script>
 </body>
 </html>
