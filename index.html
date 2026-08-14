@@ -3,154 +3,115 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ON Custom Images 4K: Flow Optimizer</title>
+<title>ON Custom Images 4K: Constructor HRP</title>
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <style>
 :root{--bg:#0f172a;--card:#1e293b;--accent:#38bdf8;--text:#f8fafc}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:20px}
-.container{max-width:1700px;margin:auto}
-h1{text-align:center;color:var(--accent)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:15px}
-.drop-zone{background:var(--card);border:2px dashed #475569;border-radius:8px;height:140px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;overflow:hidden}
-.drop-zone img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;z-index:1}
-.drop-zone span{z-index:2;color:#94a3b8;font-size:12px;pointer-events:none;background:rgba(0,0,0,.5);padding:4px 8px;border-radius:4px}
-input[type=file]{display:none}
-.controls{background:var(--card);padding:15px;border-radius:8px;margin-bottom:15px;display:flex;flex-direction:column;gap:12px}
-button{background:var(--accent);color:#0f172a;border:none;padding:12px 20px;border-radius:4px;font-weight:bold;cursor:pointer}
+.container{max-width:1700px;margin:auto}h1{text-align:center;color:var(--accent)}
+.controls{background:var(--card);padding:15px;border-radius:8px;margin-bottom:15px;display:flex;flex-direction:column;gap:10px}
+button{background:var(--accent);color:#0f172a;border:none;padding:8px 14px;border-radius:4px;font-weight:bold;cursor:pointer;font-size:12px}
 button:hover{background:#0ea5e9}
-#log{background:#000;color:#10b981;padding:10px;border-radius:4px;font-family:monospace;height:100px;overflow-y:auto;font-size:11px}
-canvas{display:block;width:100%;border:1px solid #334155;background:#fff}
-.prompt-box{background:#000;color:#fff;padding:15px;border-radius:4px;font-family:monospace;white-space:pre-wrap;font-size:11px}
-.input-group{display:flex;gap:10px;flex-wrap:wrap}
-.input-group input,.input-group select{flex:1;min-width:150px;padding:10px;background:#0f172a;border:1px solid #334155;color:#fff;border-radius:4px}
-.workspace{display:grid;grid-template-columns:400px 1fr;gap:20px;align-items:start}
+select,input[type=text]{padding:8px;background:#0f172a;border:1px solid #334155;color:#fff;border-radius:4px}
+.workspace{display:grid;grid-template-columns:420px 1fr;gap:20px;align-items:start}
 .rightcol{position:sticky;top:10px}
-.panel{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:10px;font-size:12px;margin-bottom:10px}
+canvas{display:block;width:100%;border:1px solid #334155;background:#fff;cursor:move}
+.panel{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:10px;font-size:12px;margin-bottom:8px}
 .panel h4{margin:0 0 6px;color:var(--accent);font-size:12px}
-.panel label{display:block;margin-bottom:4px;color:#cbd5e1}
+.panel label{display:block;margin:4px 0;color:#cbd5e1}
 .panel input[type=range]{width:100%;accent-color:#38bdf8}
+.prompt-box{background:#000;color:#fff;padding:10px;border-radius:4px;font-family:monospace;white-space:pre-wrap;font-size:10px;margin-top:6px}
 .calbox{border:2px solid #ef4444;border-radius:8px;padding:10px;background:rgba(239,68,68,.08);font-size:12px}
 .calbox label{display:block;margin-bottom:6px;color:#fecaca}
-.calbox input[type=range]{width:100%;accent-color:#ef4444}
+#log{background:#000;color:#10b981;padding:10px;border-radius:4px;font-family:monospace;height:80px;overflow-y:auto;font-size:11px}
 @media(max-width:1100px){.workspace{grid-template-columns:1fr}.rightcol{position:static}}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>🧠 ON Custom Images 4K: Flow Optimizer</h1>
+<h1>🧠 ON Custom Images 4K: Constructor HRP</h1>
 <div class="controls">
-<h3>1. Generador de Prompts Maestros</h3>
-<div class="input-group">
-<input type="text" id="char-desc" placeholder="Descripción del personaje">
-<select id="target-ai">
-<option value="flow">Google Flow / Veo (Video)</option>
-<option value="mj">Midjourney v6</option>
-<option value="flux">Flux / Stable Diffusion</option>
-</select>
-<button onclick="generatePrompts()">Generar 5 Prompts</button>
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+<input type="text" id="char-desc" placeholder="Descripción del personaje (ej: Vera, pelirroja...)" style="flex:1">
+<select id="addsel"></select>
+<button onclick="addMod()">➕ Añadir módulo</button>
+<button onclick="autoCal()">⚙️ Auto-calibrar caras 1:1</button>
+<button onclick="downloadSheet()">💾 Exportar Hoja 4K (limpia)</button>
 </div>
-<div id="prompts-output" class="prompt-box" style="display:none"></div>
+<div id="log">[Sistema] Cargando modelos de IA...</div>
 </div>
 <div class="workspace">
 <div class="leftcol">
-<div class="controls">
-<h3>2. Cargar imágenes</h3>
-<div class="grid">
-<label class="drop-zone" id="zone-0"><input type="file" accept="image/*" onchange="handleFile(0,this)"><span>1. FRONTAL</span></label>
-<label class="drop-zone" id="zone-1"><input type="file" accept="image/*" onchange="handleFile(1,this)"><span>2. PERFIL DER</span></label>
-<label class="drop-zone" id="zone-2"><input type="file" accept="image/*" onchange="handleFile(2,this)"><span>3. PERFIL IZQ</span></label>
-<label class="drop-zone" id="zone-3"><input type="file" accept="image/*" onchange="handleFile(3,this)"><span>4. CUERPO</span></label>
-<label class="drop-zone" id="zone-4"><input type="file" accept="image/*" onchange="handleFile(4,this)"><span>5. ESPALDA</span></label>
-</div>
-<div id="log">[Sistema] Esperando modelos de IA...</div>
+<div class="controls calbox">
+<label><input type="checkbox" id="calchk" onchange="setCal(this.checked)"> 🎯 BANDA ROJA 1:1 (altura = cara del primer módulo calibrado)</label>
+<label>↕️ Posición Y de la banda: <b id="cvy">300</b><input type="range" min="0" max="2000" step="5" value="300" oninput="setCalY(this.value)" style="accent-color:#ef4444"></label>
 </div>
 <div class="controls">
-<h3>3. 🎯 Calibre Digital 1:1</h3>
-<div class="calbox">
-<label><input type="checkbox" id="calchk" onchange="setCal(this.checked)"> ACTIVAR BANDA ROJA DE REFERENCIA</label>
-<label>↕️ Banda Y en PERFIL DER: <b id="cv1">300</b><input type="range" id="cal1" min="0" max="1200" step="5" value="300" oninput="setCalY(1,this.value)"></label>
-<label>↕️ Banda Y en PERFIL IZQ: <b id="cv2">300</b><input type="range" id="cal2" min="0" max="1200" step="5" value="300" oninput="setCalY(2,this.value)"></label>
-<p style="color:#fecaca;margin:4px 0">La altura de la banda = distancia ojo→mentón del FRONTAL. Subí la banda hasta la línea de ojos del perfil y mové su Zoom hasta que el mentón toque el borde inferior. Al descargar, la banda se excluye sola.</p>
+<label style="font-size:12px;color:#cbd5e1">🏷️ Rótulo: <input type="text" id="lbl" placeholder="Nombre (opcional)" oninput="render()" style="width:120px"> Opacidad: <input type="range" id="lblop" min="0" max="100" value="0" oninput="render()" style="width:80px;vertical-align:middle"></label>
 </div>
-</div>
-<div class="controls">
-<h3>4. Controles por pieza (Zoom anclado a la cara / X / Y)</h3>
 <div id="panels"></div>
-</div>
 </div>
 <div class="rightcol">
 <div class="controls">
-<h3>Hoja de Personaje Master (4K)</h3>
-<canvas id="sheet-canvas" width="3840" height="2600"></canvas>
-<button onclick="downloadSheet()" style="margin-top:10px">💾 Descargar PNG Final (limpio)</button>
+<h3 style="margin:0">Lienzo 4K — arrastrá los módulos, zoom con rueda</h3>
+<canvas id="sheet-canvas" width="3840" height="2160"></canvas>
 </div>
 </div>
 </div>
 </div>
 <script>
-const TARGET_FACE_H=600;
-const PIECES=[
- {label:'1. FRONTAL (ANCLA)',type:'face',off:0.58,frame:{x:20,y:20,w:1780,h:2560}},
- {label:'2. PERFIL DER',type:'face',off:0.60,frame:{x:1820,y:20,w:1400,h:1260}},
- {label:'3. PERFIL IZQ',type:'face',off:0.60,frame:{x:1820,y:1300,w:1400,h:1260}},
- {label:'4. CUERPO FRENTE',type:'fit',frame:{x:3240,y:20,w:580,h:1260}},
- {label:'5. ESPALDA',type:'fit',frame:{x:3240,y:1300,w:580,h:1260}}
-];
-const P=PIECES.map(()=>({img:null,m:null,s:1,px:0,py:0}));
-let showCal=false,calY=[0,300,300];
+const TYPES=[
+{n:'Busto Frontal (Ancla)',f:1,p:'Exact 1:1 physical clone of [P], front bust portrait, maximum skin texture, pores, freckles, neutral light gray studio background, 85mm lens, raw photograph.'},
+{n:'Perfil Derecho 90°',f:1,p:'Exact 1:1 physical clone of [P], right side profile 90 degrees, jawline and ear alignment, neutral gray studio background, raw photograph.'},
+{n:'Perfil Izquierdo 90°',f:1,p:'Exact 1:1 physical clone of [P], left side profile 90 degrees, skull structure, neutral gray studio background, raw photograph.'},
+{n:'Vista 3/4 Derecha',f:1,p:'Exact 1:1 physical clone of [P], three-quarter view turned 45 degrees right, neutral gray studio background, raw photograph.'},
+{n:'Vista 3/4 Izquierda',f:1,p:'Exact 1:1 physical clone of [P], three-quarter view turned 45 degrees left, neutral gray studio background, raw photograph.'},
+{n:'Busto Espalda',f:0,p:'Exact clone of [P], back of head and shoulders, full hair volume, neutral gray studio background, raw photograph.'},
+{n:'Cuerpo Frente (sin cabeza)',f:0,p:'NO HEAD, NO NECK. Headless full body front view of [P], clean crop at collar seam, neutral pose, outfit strictly matching reference.'},
+{n:'Cuerpo Espalda',f:0,p:'Full body back view of [P], no backpack, back of exact outfit, neutral gray studio background.'},
+{n:'Cuerpo Perfil (lado)',f:0,p:'Full body side profile view of [P], complete outfit and footwear, neutral gray studio background.'},
+{n:'Panel 6 Expresiones',f:0,p:'Grid of 6 key expressions of [P]: neutral, joy, anger, sadness, surprise, disgust. Same exact face in all, neutral gray background.'},
+{n:'Macro Ojos e Iris',f:0,p:'Extreme macro of both eyes of [P], iris texture, eyelashes, micro-detail, raw photograph.'},
+{n:'Macro Manos',f:0,p:'Close-up of both hands of [P] relaxed, anatomically correct fingers, nails, rings, raw photograph.'}];
+let mods=[],sel=-1,drag=null,guides={x:null,y:null},cloneSrc=-1,showCal=false,calY=300;
+const cv=document.getElementById('sheet-canvas'),ctx=cv.getContext('2d');
+document.getElementById('addsel').innerHTML=TYPES.map((t,i)=>`<option value="${i}">${t.n}</option>`).join('');
 const log=m=>{const l=document.getElementById('log');l.innerHTML+='<br>'+m;l.scrollTop=l.scrollHeight};
 function setCal(v){showCal=v;render()}
-function setCalY(i,v){calY[i]=+v;document.getElementById('cv'+i).textContent=v;render()}
-function buildPanels(){document.getElementById('panels').innerHTML=PIECES.map((p,i)=>`
-<div class="panel"><h4>🎛️ ${p.label}</h4>
-<label>🔍 Zoom: <b id="z${i}">1.000</b>x<input type="range" id="zi${i}" min="0.4" max="2.5" step="0.005" value="1" oninput="setP(${i},'s',this.value)"></label>
-<label>↔️ X: <b id="x${i}">0</b><input type="range" id="xi${i}" min="-1900" max="1900" step="2" value="0" oninput="setP(${i},'px',this.value)"></label>
-<label>↕️ Y: <b id="y${i}">0</b><input type="range" id="yi${i}" min="-1900" max="1900" step="2" value="0" oninput="setP(${i},'py',this.value)"></label>
-</div>`).join('')}
-buildPanels();
-function setP(i,k,v){const p=P[i];v=parseFloat(v);
- if(k==='s'&&p.m&&p.img){const cx=p.m.cx-p.img.width/2,cy=p.m.cy-p.img.height/2;p.px+=cx*(p.s-v);p.py+=cy*(p.s-v);}
- p[k]=v;sync(i);render()}
-function sync(i){document.getElementById('zi'+i).value=P[i].s;document.getElementById('xi'+i).value=P[i].px;document.getElementById('yi'+i).value=P[i].py;document.getElementById('z'+i).textContent=P[i].s.toFixed(3);document.getElementById('x'+i).textContent=Math.round(P[i].px);document.getElementById('y'+i).textContent=Math.round(P[i].py)}
-async function init(){try{const U='https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';await faceapi.nets.tinyFaceDetector.loadFromUri(U);await faceapi.nets.faceLandmark68Net.loadFromUri(U);log('[Éxito] Modelos de IA cargados.')}catch(e){log('[Error] No se pudieron cargar los modelos.')}}
+function setCalY(v){calY=+v;document.getElementById('cvy').textContent=v;render()}
+async function init(){try{const U='https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';await faceapi.nets.tinyFaceDetector.loadFromUri(U);await faceapi.nets.faceLandmark68Net.loadFromUri(U);log('[Éxito] IA cargada.')}catch(e){log('[Error] modelos IA.')}}
 init();
-async function getFaceMetrics(img){const c=document.createElement('canvas');c.width=img.width;c.height=img.height;const x=c.getContext('2d');x.drawImage(img,0,0);const d=await faceapi.detectSingleFace(c,new faceapi.TinyFaceDetectorOptions({inputSize:512,scoreThreshold:0.3})).withFaceLandmarks();if(!d)return null;const p=d.landmarks.positions,t=p[27],b=p[8];return{h:Math.abs(b.y-t.y),cx:(t.x+b.x)/2,cy:(t.y+b.y)/2}}
-function fitScale(i){const f=PIECES[i].frame;return Math.min(f.w/P[i].img.width,f.h/P[i].img.height)}
-function applyAuto(i){const p=P[i],f=PIECES[i].frame;
- if(PIECES[i].type==='face'&&p.m){p.s=TARGET_FACE_H/p.m.h;p.px=(p.img.width/2-p.m.cx)*p.s;p.py=f.h*(PIECES[i].off-0.5)+(p.img.height/2-p.m.cy)*p.s;log(PIECES[i].label+': auto-ajuste aplicado (zoom '+p.s.toFixed(3)+'x).');}
- else{p.s=fitScale(i);p.px=0;p.py=0;}
- sync(i)}
-function handleFile(i,input){if(input.files&&input.files[0]){const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=async()=>{P[i].img=img;document.getElementById('zone-'+i).innerHTML='<img src="'+e.target.result+'"><span>Listo</span>';if(PIECES[i].type==='face')P[i].m=await getFaceMetrics(img);applyAuto(i);render()};img.src=e.target.result};r.readAsDataURL(input.files[0])}}
-function render(){const ctx=document.getElementById('sheet-canvas').getContext('2d');ctx.clearRect(0,0,3840,2600);ctx.fillStyle='#f1f5f9';ctx.fillRect(0,0,3840,2600);
- for(let i=0;i<5;i++){const p=P[i];if(!p.img)continue;const f=PIECES[i].frame;const dw=p.img.width*p.s,dh=p.img.height*p.s;
-  ctx.save();ctx.beginPath();ctx.rect(f.x,f.y,f.w,f.h);ctx.clip();
-  ctx.drawImage(p.img,f.x+f.w/2+p.px-dw/2,f.y+f.h/2+p.py-dh/2,dw,dh);ctx.restore();}
- if(showCal&&P[0].m){const D=P[0].m.h*P[0].s;
-  for(const i of[1,2]){const f=PIECES[i].frame;const y=f.y+Math.max(0,Math.min(calY[i],f.h-D));
-   ctx.fillStyle='rgba(239,68,68,0.22)';ctx.fillRect(f.x+4,y,f.w-8,D);
-   ctx.strokeStyle='#ef4444';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(f.x+4,y);ctx.lineTo(f.x+f.w-4,y);ctx.moveTo(f.x+4,y+D);ctx.lineTo(f.x+f.w-4,y+D);ctx.stroke();}}
-}
-function downloadSheet(){const c=document.getElementById('sheet-canvas');const wasCal=showCal;showCal=false;render();const a=document.createElement('a');a.download='CharacterSheet_4K_Flow.png';a.href=c.toDataURL('image/png');a.click();showCal=wasCal;render()}
-function generatePrompts(){const desc=document.getElementById('char-desc').value||'Personaje realista, rasgos detallados';const t=document.getElementById('target-ai').value;const out=document.getElementById('prompts-output');let p1='',p2='';if(t==='mj'){p1=' --ar 3:4 --style raw --cref [URL_REF] --cw 100';p2=' --ar 1:1 --style raw --cref [URL_REF] --cw 100'}else if(t==='flow'){p1=' Fotografía cinematográfica 4K, iluminación de estudio, lente 85mm f/1.8.';p2=' Fotografía de perfil técnico, misma iluminación y vestuario.'}else{p1=' (Use IP-Adapter weight 1.0)';p2=' (Use IP-Adapter weight 1.0)'}
-out.innerText=`
-PROMPT 1 (ANCLA FRONTAL):
-Exact 1:1 physical clone of ${desc}, front bust portrait, maximum skin texture, pores, micro-wrinkles. Neutral light gray studio background.${p1}
-
-PROMPT 2 (PERFIL DER):
-Exact 1:1 physical clone of ${desc}, right side profile 90 degrees, focusing on jawline and ear alignment. Neutral light gray studio background.${p2}
-
-PROMPT 3 (PERFIL IZQ):
-Exact 1:1 physical clone of ${desc}, left side profile 90 degrees, focusing on skull structure. Neutral light gray studio background.${p2}
-
-PROMPT 4 (CUERPO SIN CUELLO):
-NO HEAD, NO NECK. Headless full body front view of ${desc}. Clean horizontal crop right at the shirt collar seam line. Neutral pose, arms resting at sides. Showing complete outfit strictly matching reference.${p1}
-
-PROMPT 5 (ESPALDA):
-Full body back view of ${desc}, standing straight seen directly from behind, NO backpack, NO objects. Showing the back of the exact same outfit.${p1}
-
-PROMPT MAESTRO PARA GOOGLE FLOW:
-"Cinematic tracking shot of the character from the reference sheet. Maintain exact facial consistency, exact clothing texture, and identical physical proportions across all frames. 4K, highly detailed, temporal stability."`;
-out.style.display='block'}
+function addMod(){mods.push({t:+document.getElementById('addsel').value,img:null,s:0.5,x:150+mods.length*90,y:120+mods.length*70,m:null});buildPanels();render();log('Módulo añadido: '+TYPES[mods[mods.length-1].t].n)}
+function buildPanels(){document.getElementById('panels').innerHTML=mods.map((mo,i)=>`
+<div class="panel"><h4>🎛️ M${i+1} — ${TYPES[mo.t].n}</h4>
+<input type="file" accept="image/*" onchange="loadMod(${i},this)">
+<label>🔍 Zoom: <b id="mz${i}">${mo.s.toFixed(3)}</b>x<input type="range" id="mi${i}" min="0.05" max="3" step="0.005" value="${mo.s}" oninput="setMS(${i},this.value)"></label>
+<button onclick="cloneSrc=${i};log('Tamaño de M${i+1} listo para clonar.')">= Fuente</button>
+<button onclick="applyClone(${i})">📏 Pegar tamaño</button>
+<button onclick="delMod(${i})">🗑️</button>
+<div class="prompt-box" id="pp${i}"></div><button onclick="copyP(${i})">📋 Copiar prompt</button>
+</div>`).join('');mods.forEach((mo,i)=>updPrompt(i))}
+function updPrompt(i){const el=document.getElementById('pp'+i);if(el)el.textContent=TYPES[mods[i].t].p.replace('[P]',document.getElementById('char-desc').value||'the reference character')}
+function copyP(i){updPrompt(i);navigator.clipboard.writeText(document.getElementById('pp'+i).textContent);log('Prompt copiado.')}
+document.getElementById('char-desc').addEventListener('input',()=>mods.forEach((m,i)=>updPrompt(i)));
+function setMS(i,v){mods[i].s=+v;document.getElementById('mz'+i).textContent=(+v).toFixed(3);render()}
+function applyClone(i){if(cloneSrc<0||!mods[cloneSrc].img||!mods[i].img)return;const tw=mods[cloneSrc].img.width*mods[cloneSrc].s;mods[i].s=tw/mods[i].img.width;document.getElementById('mi'+i).value=mods[i].s;document.getElementById('mz'+i).textContent=mods[i].s.toFixed(3);render();log('Tamaño clonado a M'+(i+1))}
+function delMod(i){mods.splice(i,1);sel=-1;cloneSrc=-1;buildPanels();render()}
+function loadMod(i,input){if(!input.files[0])return;const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=async()=>{mods[i].img=img;if(TYPES[mods[i].t].f){mods[i].m=await getFaceMetrics(img);if(mods[i].m){mods[i].s=600/mods[i].m.h;log('M'+(i+1)+' auto-calibrado 1:1.')}}else{mods[i].s=Math.min(1200/img.height,1)}document.getElementById('mi'+i).value=mods[i].s;document.getElementById('mz'+i).textContent=mods[i].s.toFixed(3);render()};img.src=e.target.result};r.readAsDataURL(input.files[0])}
+async function getFaceMetrics(img){const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);const d=await faceapi.detectSingleFace(c,new faceapi.TinyFaceDetectorOptions({inputSize:512,scoreThreshold:0.3})).withFaceLandmarks();if(!d)return null;const p=d.landmarks.positions,t=p[27],b=p[8];return{h:Math.abs(b.y-t.y)}}
+function autoCal(){let n=0;mods.forEach((mo,i)=>{if(mo.img&&mo.m&&TYPES[mo.t].f){mo.s=600/mo.m.h;document.getElementById('mi'+i).value=mo.s;document.getElementById('mz'+i).textContent=mo.s.toFixed(3);n++}});render();log('Caras calibradas 1:1: '+n)}
+function cPos(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*(cv.width/r.width),y:(e.clientY-r.top)*(cv.height/r.height)}}
+cv.addEventListener('mousedown',e=>{const p=cPos(e);drag=null;for(let i=mods.length-1;i>=0;i--){const mo=mods[i];if(!mo.img)continue;const w=mo.img.width*mo.s,h=mo.img.height*mo.s;if(p.x>=mo.x&&p.x<=mo.x+w&&p.y>=mo.y&&p.y<=mo.y+h){sel=i;drag={i,ox:p.x-mo.x,oy:p.y-mo.y};break}}if(!drag)sel=-1;render()});
+cv.addEventListener('mousemove',e=>{if(!drag)return;const p=cPos(e),mo=mods[drag.i],w=mo.img.width*mo.s,h=mo.img.height*mo.s;let nx=p.x-drag.ox,ny=p.y-drag.oy;guides={x:null,y:null};const cx=nx+w/2,cy=ny+h/2;const tx=[cv.width/2],ty=[cv.height/2];mods.forEach((o,j)=>{if(j!==drag.i&&o.img){const ow=o.img.width*o.s,oh=o.img.height*o.s;tx.push(o.x+ow/2,o.x,o.x+ow);ty.push(o.y+oh/2,o.y,o.y+oh)}});for(const v of tx){if(Math.abs(cx-v)<30){nx=v-w/2;guides.x=v;break}}for(const v of ty){if(Math.abs(cy-v)<30){ny=v-h/2;guides.y=v;break}}mo.x=nx;mo.y=ny;render()});
+window.addEventListener('mouseup',()=>{drag=null;guides={x:null,y:null};render()});
+cv.addEventListener('wheel',e=>{const p=cPos(e);for(let i=mods.length-1;i>=0;i--){const mo=mods[i];if(!mo.img)continue;const w=mo.img.width*mo.s,h=mo.img.height*mo.s;if(p.x>=mo.x&&p.x<=mo.x+w&&p.y>=mo.y&&p.y<=mo.y+h){e.preventDefault();mo.s*=e.deltaY<0?1.05:0.95;document.getElementById('mi'+i).value=mo.s;document.getElementById('mz'+i).textContent=mo.s.toFixed(3);render();break}}},{passive:false});
+function render(){ctx.clearRect(0,0,3840,2160);ctx.fillStyle='#f1f5f9';ctx.fillRect(0,0,3840,2160);
+ mods.forEach((mo,i)=>{if(!mo.img)return;const w=mo.img.width*mo.s,h=mo.img.height*mo.s;ctx.drawImage(mo.img,mo.x,mo.y,w,h);if(i===sel){ctx.strokeStyle='#38bdf8';ctx.lineWidth=8;ctx.strokeRect(mo.x,mo.y,w,h)}});
+ if(drag){ctx.strokeStyle='#facc15';ctx.lineWidth=5;ctx.setLineDash([20,15]);if(guides.x){ctx.beginPath();ctx.moveTo(guides.x,0);ctx.lineTo(guides.x,2160);ctx.stroke()}if(guides.y){ctx.beginPath();ctx.moveTo(0,guides.y);ctx.lineTo(3840,guides.y);ctx.stroke()}ctx.setLineDash([])}
+ if(showCal){const fm=mods.find(mo=>mo.m&&mo.img);if(fm){const D=fm.m.h*fm.s;ctx.fillStyle='rgba(239,68,68,0.22)';ctx.fillRect(0,calY,3840,D);ctx.strokeStyle='#ef4444';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(0,calY);ctx.lineTo(3840,calY);ctx.moveTo(0,calY+D);ctx.lineTo(3840,calY+D);ctx.stroke()}}
+ const op=+document.getElementById('lblop').value/100,txt=document.getElementById('lbl').value;
+ if(op>0&&txt){ctx.globalAlpha=op;ctx.fillStyle='#334155';ctx.font='bold 70px sans-serif';ctx.textAlign='center';ctx.fillText(txt,1920,120);ctx.textAlign='left';ctx.globalAlpha=1}}
+function downloadSheet(){const s=sel,d=drag;sel=-1;drag=null;const sc=showCal;showCal=false;render();const a=document.createElement('a');a.download='Hoja_Personaje_4K.png';a.href=cv.toDataURL('image/png');a.click();showCal=sc;sel=s;render()}
 </script>
 </body>
 </html>
