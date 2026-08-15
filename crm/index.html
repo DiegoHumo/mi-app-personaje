@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REBELDE IA // RB-CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#050505;color:#f5f5f5;font-family:'Chakra Petch',sans-serif}
+header{display:flex;align-items:center;justify-content:center;gap:14px;padding:24px 6vw;border-bottom:1px solid #222}
+header h1{font-size:22px;letter-spacing:3px;margin:0}header h1 span{color:#e10600}
+.tag{color:#8a8a8a;font-size:11px;letter-spacing:4px}
+.wrap{max-width:1600px;margin:26px auto;padding:0 20px;display:grid;grid-template-columns:380px 1fr;gap:18px}
+.card{background:#0d0d0d;border:1px solid #242424;border-left:3px solid #e10600;padding:16px}
+.card h3{margin:0 0 12px;font-size:14px;letter-spacing:2px;color:#e10600}
+label{display:block;margin:8px 0;color:#bbb;font-size:12px}
+select,input,textarea{width:100%;box-sizing:border-box;background:#0a0a0a;border:1px solid #2a2a2a;color:#f5f5f5;padding:9px;border-radius:4px;font-family:'Share Tech Mono',monospace}
+input[type=range]{accent-color:#e10600}
+button{background:#e10600;color:#fff;border:none;padding:9px 13px;border-radius:4px;font-weight:bold;cursor:pointer;font-family:'Chakra Petch';margin:4px 4px 0 0}
+button:hover{background:#ff1a1a}
+table{width:100%;border-collapse:collapse;font-family:'Share Tech Mono',monospace;font-size:12px}
+th{color:#e10600;text-align:left;padding:8px;border-bottom:2px solid #242424}
+td{padding:8px;border-bottom:1px solid #1c1c1c;color:#cfcfcf}
+#st{font-family:'Share Tech Mono',monospace;color:#9a9a9a;font-size:13px}
+.row{display:flex;gap:8px}
+@media(max-width:1000px){.wrap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<a href="../" style="position:fixed;top:12px;left:12px;z-index:99;color:#e10600;font-size:12px;letter-spacing:2px;text-decoration:none;border:1px solid #e10600;padding:6px 12px;background:#050505">← HUB</a>
+<header>
+<svg viewBox="0 0 100 100" width="38" height="38"><path fill="#f2f2f2" d="M50 6C30 6 18 20 18 40v18l8 6v10l12 14h24l12-14V64l8-6V40C82 20 70 6 50 6z"/><path fill="#0a0a0a" d="M26 38h48v16l-10 12H36L26 54z"/><path fill="#e10600" d="M32 44l14 4-13 4zM68 44l-14 4 13 4z"/></svg>
+<div><h1>REBELDE <span>IA</span> // RB-CRM</h1><div class="tag">RANKING REBELDE · BASE DE DATOS DE HERRAMIENTAS</div></div>
+</header>
+<div class="wrap">
+<div>
+<div class="card"><h3>➕ CARGAR HERRAMIENTA</h3>
+<input type="hidden" id="editId" value="">
+<label>NOMBRE<input id="name" placeholder="EJ: CHATGPT PLUS"></label>
+<label>CATEGORÍA<select id="cat"><option>IA de texto</option><option>IA de video</option><option>IA de imagen</option><option>IA de audio</option><option>IA de código</option><option>Otra</option></select></label>
+<label>SCORE REBELDE <b id="scv">7.0</b><input type="range" id="score" min="0" max="10" step="0.1" value="7" oninput="document.getElementById('scv').textContent=(+this.value).toFixed(1)"></label>
+<label>VEREDICTO<select id="ver"><option value="rec">🟢 RECOMENDADA</option><option value="norec">🔴 NO RECOMENDADA</option></select></label>
+<div class="row">
+<label style="flex:1">GRATIS<select id="free"><option>Sí</option><option>No</option><option>Freemium</option></select></label>
+<label style="flex:1">¿PAGARÍAS?<select id="pay"><option>Sí</option><option>No</option></select></label>
+</div>
+<label>LINK<input id="link" placeholder="https://..."></label>
+<label>NOTAS<textarea id="notes" placeholder="Lo bueno, lo malo, el humo detectado..."></textarea></label>
+<button onclick="saveItem()">💾 GUARDAR</button>
+</div>
+<div class="card"><h3>🔌 ACCIONES</h3>
+<button onclick="importVer()">⚡ IMPORTAR DESDE RB-VEREDICTO</button>
+<button onclick="exportJSON()">📤 EXPORTAR JSON</button>
+<button onclick="exportCSV()">📊 EXPORTAR CSV</button>
+</div>
+</div>
+<div class="card"><h3>🏆 RANKING REBELDE</h3>
+<div id="st" style="margin-bottom:10px"></div>
+<div class="row" style="margin-bottom:10px">
+<input id="q" oninput="render()" placeholder="🔍 Buscar herramienta..." style="flex:2">
+<select id="fcat" onchange="render()" style="flex:1"><option value="all">Todas las categorías</option><option>IA de texto</option><option>IA de video</option><option>IA de imagen</option><option>IA de audio</option><option>IA de código</option><option>Otra</option></select>
+<select id="fver" onchange="render()" style="flex:1"><option value="all">Todos</option><option value="rec">🟢</option><option value="norec">🔴</option></select>
+</div>
+<table><thead><tr><th>#</th><th>HERRAMIENTA</th><th>CAT</th><th>SCORE</th><th>VEREDICTO</th><th>GRATIS</th><th>PAGARÍA</th><th>FECHA</th><th></th></tr></thead><tbody id="tbl"></tbody></table>
+</div>
+</div>
+<script>
+let items=JSON.parse(localStorage.getItem('rbcrm')||'[]');
+const $=id=>document.getElementById(id);
+function persist(){localStorage.setItem('rbcrm',JSON.stringify(items))}
+function render(){const q=$('q').value.toLowerCase(),fc=$('fcat').value,fv=$('fver').value;
+ const list=items.filter(e=>(!q||e.name.toLowerCase().includes(q))&&(fc==='all'||e.cat===fc)&&(fv==='all'||e.ver===fv)).sort((a,b)=>b.score-a.score);
+ $('tbl').innerHTML=list.map(e=>{const i=items.indexOf(e);return `<tr><td>${list.indexOf(e)+1}</td><td><b style="color:#f5f5f5">${e.name}</b>${e.link?` <a href="${e.link}" target="_blank" style="color:#666">↗</a>`:''}</td><td>${e.cat}</td><td style="color:#e10600">${(+e.score).toFixed(1)}</td><td>${e.ver==='rec'?'🟢':''}</td><td>${e.free||'-'}</td><td>${e.pay||'-'}</td><td>${e.date}</td><td><button onclick="editItem(${i})">✏️</button><button onclick="delItem(${i})">✕</button></td></tr>`}).join('')||'<tr><td colspan="9">Sin herramientas todavía. Cargá una o importá desde RB-VEREDICTO.</td></tr>';
+ const n=items.length,rec=items.filter(e=>e.ver==='rec').length,avg=n?items.reduce((a,b)=>a+ +b.score,0)/n:0;
+ $('st').textContent=`ANALIZADAS: ${n} · 🟢 ${rec} (${n?Math.round(rec/n*100):0}%) · PROMEDIO REBELDE: ${avg.toFixed(1)}`}
+function saveItem(){const name=$('name').value.trim();if(!name){alert('Poné el nombre de la herramienta.');return}
+ const e={name,cat:$('cat').value,score:+$('score').value,ver:$('ver').value,free:$('free').value,pay:$('pay').value,link:$('link').value,notes:$('notes').value,date:new Date().toLocaleDateString('es-AR')};
+ const id=$('editId').value;
+ if(id!==''){items[+id]={...items[+id],...e};$('editId').value=''}else items.unshift(e);
+ $('name').value='';$('link').value='';$('notes').value='';persist();render()}
+function editItem(i){const e=items[i];$('editId').value=i;$('name').value=e.name;$('cat').value=e.cat;$('score').value=e.score;$('scv').textContent=(+e.score).toFixed(1);$('ver').value=e.ver;$('free').value=e.free||'Sí';$('pay').value=e.pay||'Sí';$('link').value=e.link||'';$('notes').value=e.notes||'';window.scrollTo(0,0)}
+function delItem(i){if(confirm('¿Eliminar '+items[i].name+' del ranking?')){items.splice(i,1);persist();render()}}
+function importVer(){const v=JSON.parse(localStorage.getItem('rbver')||'[]');let n=0;
+ v.forEach(e=>{const name=(e.name||'').trim();if(!name||items.some(x=>x.name.toLowerCase()===name.toLowerCase()))return;
+  const sc=e.man?+e.ms:e.c.reduce((a,b)=>a+b,0)/5;const rec=e.ver==='auto'?sc>=7:e.ver==='rec';
+  items.unshift({name,cat:e.cat||'Otra',score:sc,ver:rec?'rec':'norec',free:'',pay:'',link:'',notes:'Importado desde RB-VEREDICTO.',date:e.d});n++});
+ persist();render();alert(n?`✔ ${n} veredicto(s) importado(s) al Ranking Rebelde.`:'No hay veredictos nuevos para importar.')}
+function exportJSON(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(items,null,2)],{type:'application/json'}));a.download='RANKING_REBELDE.json';a.click()}
+function exportCSV(){const rows=[['Nombre','Categoría','Score','Veredicto','Gratis','Pagaría','Fecha','Notas'],...items.map(e=>[e.name,e.cat,(+e.score).toFixed(1),e.ver==='rec'?'RECOMENDADA':'NO RECOMENDADA',e.free,e.pay,e.date,e.notes])];
+ const csv=rows.map(r=>r.map(c=>`"${(c||'').toString().replace(/"/g,'""')}"`).join(';')).join('\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));a.download='RANKING_REBELDE.csv';a.click()}
+render();
+</script>
+</body>
+</html>
