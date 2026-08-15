@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REBELDE IA // RB-SOCIAL</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#050505;color:#f5f5f5;font-family:'Chakra Petch',sans-serif}
+header{display:flex;align-items:center;gap:14px;padding:24px 6vw;border-bottom:1px solid #222}
+header h1{font-size:22px;letter-spacing:3px;margin:0}header h1 span{color:#e10600}
+.tag{color:#8a8a8a;font-size:11px;letter-spacing:4px}
+.wrap{max-width:1100px;margin:30px auto;padding:0 20px;display:flex;flex-direction:column;gap:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+select,input,textarea{background:#0d0d0d;border:1px solid #2a2a2a;color:#f5f5f5;padding:10px;border-radius:4px;font-family:'Share Tech Mono',monospace}
+select{flex:1;min-width:180px}
+.card{background:#0d0d0d;border:1px solid #242424;border-left:3px solid #e10600;padding:16px}
+.card h3{margin:0 0 10px;font-size:14px;letter-spacing:2px;color:#e10600}
+table{width:100%;border-collapse:collapse;font-family:'Share Tech Mono',monospace;font-size:13px}
+td{padding:6px 8px;border-bottom:1px solid #1c1c1c}
+td:last-child{text-align:right;color:#e10600}
+textarea{width:100%;min-height:110px;box-sizing:border-box}
+#status{font-family:'Share Tech Mono',monospace;margin-top:8px;font-size:14px}
+.ok{color:#39ff5a}.warn{color:#ffb020}.bad{color:#e10600;font-weight:bold}
+button{background:#e10600;color:#fff;border:none;padding:10px 16px;border-radius:4px;font-weight:bold;cursor:pointer;font-family:'Chakra Petch'}
+button:hover{background:#ff1a1a}
+.mono{font-family:'Share Tech Mono',monospace;color:#9a9a9a;font-size:13px;white-space:pre-wrap;margin-top:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+footer{text-align:center;color:#555;font-family:'Share Tech Mono',monospace;font-size:12px;padding:30px}
+</style>
+</head>
+<body>
+<header>
+<svg viewBox="0 0 100 100" width="38" height="38"><path fill="#f2f2f2" d="M50 6C30 6 18 20 18 40v18l8 6v10l12 14h24l12-14V64l8-6V40C82 20 70 6 50 6z"/><path fill="#0a0a0a" d="M26 38h48v16l-10 12H36L26 54z"/><path fill="#e10600" d="M32 44l14 4-13 4zM68 44l-14 4 13 4z"/></svg>
+<div><h1>REBELDE <span>IA</span> // RB-SOCIAL</h1><div class="tag">MEDIDAS · LÍMITES · HASHTAGS</div></div>
+</header>
+<div class="wrap">
+<div class="row">
+<select id="plat" onchange="renderPlat()"></select>
+<select id="field" onchange="loadField()"></select>
+</div>
+<div class="grid2">
+<div class="card"><h3>📐 MEDIDAS DE IMAGEN/VIDEO</h3><table id="specs"></table></div>
+<div class="card"><h3>⌨️ LÍMITES DE TEXTO</h3><table id="limits"></table></div>
+</div>
+<div class="card"><h3>✍️ REDACTOR CON ALERTA DE CARACTERES</h3>
+<textarea id="txt" oninput="count()" placeholder="Escribí o pegá tu descripción / bio / título..."></textarea>
+<div id="status"></div>
+<div class="row" style="margin-top:10px"><button onclick="saveTxt()">💾 GUARDAR PARA ESTA RED</button></div>
+</div>
+<div class="card"><h3># GENERADOR DE HASHTAGS</h3>
+<div class="row"><input id="tags" style="flex:1" placeholder="ej: video ia gratis herramientas"><button onclick="genTags()">GENERAR</button><button onclick="copyTags()">📋 COPIAR</button></div>
+<div id="tagout" class="mono"></div>
+</div>
+</div>
+<footer>HERRAMIENTA DESCLASIFICADA · USALA · MODIFICALA · HACELA TUYA · © REBELDE IA</footer>
+<script>
+const DATA={
+youtube:{n:'YOUTUBE',sp:[['Miniatura','1280×720'],['Banner canal','2560×1440'],['Zona segura banner','1546×423'],['Avatar','800×800'],['Shorts (vertical)','1080×1920']],lm:[['Título de video',100],['Descripción',5000],['Nombre de canal',50],['Post de comunidad',5000]]},
+instagram:{n:'INSTAGRAM',sp:[['Post cuadrado','1080×1080'],['Post vertical','1080×1350'],['Story / Reel','1080×1920'],['Avatar','320×320']],lm:[['Bio',150],['Caption',2200],['Hashtags por post',30]]},
+x:{n:'X / TWITTER',sp:[['Imagen de post','1600×900'],['Banner','1500×500'],['Avatar','400×400']],lm:[['Post',280],['Bio',160],['Nombre',50]]},
+tiktok:{n:'TIKTOK',sp:[['Video vertical','1080×1920'],['Avatar','200×200']],lm:[['Bio',80],['Caption',2200],['Nombre',32]]},
+facebook:{n:'FACEBOOK',sp:[['Post imagen','1200×630'],['Portada','820×312'],['Avatar','170×170']],lm:[['Descripción/About',255],['Post',63206]]},
+linkedin:{n:'LINKEDIN',sp:[['Banner personal','1584×396'],['Post imagen','1200×627']],lm:[['Titular',220],['Acerca de',2600],['Post',3000]]}};
+let curLimit=0;
+document.getElementById('plat').innerHTML=Object.keys(DATA).map(k=>`<option value="${k}">${DATA[k].n}</option>`).join('');
+function renderPlat(){const d=DATA[document.getElementById('plat').value];
+ document.getElementById('specs').innerHTML=d.sp.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}px</td></tr>`).join('');
+ document.getElementById('limits').innerHTML=d.lm.map(r=>`<tr><td>${r[0]}</td><td>${r[1]} car.</td></tr>`).join('');
+ document.getElementById('field').innerHTML=d.lm.map((r,i)=>`<option value="${i}">${r[0]} (${r[1]})</option>`).join('');
+ loadField()}
+function loadField(){const d=DATA[document.getElementById('plat').value];const i=+document.getElementById('field').value;curLimit=d.lm[i][1];
+ const key='rb_'+document.getElementById('plat').value+'_'+i;const sv=localStorage.getItem(key);
+ document.getElementById('txt').value=sv||'';count()}
+function count(){const len=document.getElementById('txt').value.length;const el=document.getElementById('status');
+ if(len>curLimit){el.className='bad';el.textContent=`⛔ TE PASASTE POR ${len-curLimit} CARACTERES (${len}/${curLimit})`}
+ else if(len>curLimit*0.8){el.className='warn';el.textContent=`⚠️ CERCA DEL LÍMITE: ${len}/${curLimit} (te quedan ${curLimit-len})`}
+ else{el.className='ok';el.textContent=`✔ ${len}/${curLimit} — OK`}}
+function saveTxt(){const key='rb_'+document.getElementById('plat').value+'_'+document.getElementById('field').value;localStorage.setItem(key,document.getElementById('txt').value);document.getElementById('status').textContent='💾 GUARDADO EN ESTA NAVEGADOR'}
+function genTags(){const base=['#IA','#InteligenciaArtificial','#HerramientasIA','#RebeldeIA','#Tecnologia','#AI','#TechEspañol'];
+ const w=document.getElementById('tags').value.trim().split(/\s+/).filter(x=>x).map(x=>'#'+x[0].toUpperCase()+x.slice(1).toLowerCase());
+ const all=[...new Set([...base,...w])];document.getElementById('tagout').textContent=all.join(' ')+(all.length>30?`\n\n⚠️ ${all.length} hashtags: Instagram permite máx. 30.`:'')}
+function copyTags(){navigator.clipboard.writeText(document.getElementById('tagout').textContent)}
+renderPlat();
+</script>
+</body>
+</html>
