@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REBELDE IA // RB-VEREDICTO</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#050505;color:#f5f5f5;font-family:'Chakra Petch',sans-serif}
+header{display:flex;align-items:center;justify-content:center;gap:14px;padding:24px 6vw;border-bottom:1px solid #222}
+header h1{font-size:22px;letter-spacing:3px;margin:0}header h1 span{color:#e10600}
+.tag{color:#8a8a8a;font-size:11px;letter-spacing:4px}
+.wrap{max-width:1500px;margin:26px auto;padding:0 20px;display:grid;grid-template-columns:380px 1fr;gap:18px}
+.card{background:#0d0d0d;border:1px solid #242424;border-left:3px solid #e10600;padding:16px}
+.card h3{margin:0 0 12px;font-size:14px;letter-spacing:2px;color:#e10600}
+label{display:block;margin:8px 0;color:#bbb;font-size:12px}
+input,select{width:100%;box-sizing:border-box;background:#0a0a0a;border:1px solid #2a2a2a;color:#f5f5f5;padding:9px;border-radius:4px;font-family:'Share Tech Mono',monospace}
+input[type=range]{accent-color:#e10600}
+button{background:#e10600;color:#fff;border:none;padding:10px 14px;border-radius:4px;font-weight:bold;cursor:pointer;font-family:'Chakra Petch';margin:4px 4px 0 0}
+button:hover{background:#ff1a1a}
+canvas{width:100%;border:1px solid #242424;background:#000}
+.hist{font-family:'Share Tech Mono',monospace;font-size:12px;color:#9a9a9a}
+.hist div{border-bottom:1px solid #1c1c1c;padding:6px 0;display:flex;gap:8px;align-items:center}
+.hist button{padding:2px 8px;margin:0;font-size:11px}
+#ovl{position:fixed;inset:0;background:#000;display:none;align-items:center;justify-content:center;flex-direction:column;z-index:99;cursor:pointer}
+#ovl img{max-width:92vw;max-height:86vh;border:2px solid #e10600}
+#ovl .anim{animation:platein 1.4s ease-out}
+@keyframes platein{0%{opacity:0;transform:scale(1.07);filter:brightness(3)}55%{opacity:1;filter:brightness(1.4)}100%{opacity:1;transform:scale(1);filter:brightness(1)}}
+#ovl .scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0 1px,transparent 1px 3px);pointer-events:none}
+#ovl .hint{color:#666;font-family:'Share Tech Mono',monospace;margin-top:14px;font-size:12px}
+@media(max-width:1000px){.wrap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<a href="../" style="position:fixed;top:12px;left:12px;z-index:99;color:#e10600;font-size:12px;letter-spacing:2px;text-decoration:none;border:1px solid #e10600;padding:6px 12px;background:#050505">← HUB</a>
+<header>
+<svg viewBox="0 0 100 100" width="38" height="38"><path fill="#f2f2f2" d="M50 6C30 6 18 20 18 40v18l8 6v10l12 14h24l12-14V64l8-6V40C82 20 70 6 50 6z"/><path fill="#0a0a0a" d="M26 38h48v16l-10 12H36L26 54z"/><path fill="#e10600" d="M32 44l14 4-13 4zM68 44l-14 4 13 4z"/></svg>
+<div><h1>REBELDE <span>IA</span> // RB-VEREDICTO</h1><div class="tag">LA VERDAD DETRÁS DE LA IA</div></div>
+</header>
+<div class="wrap">
+<div>
+<div class="card"><h3>📋 DATOS DE LA PRUEBA</h3>
+<label>HERRAMIENTA<input id="name" oninput="render()" placeholder="EJ: CHATGPT PLUS"></label>
+<label>CATEGORÍA<select id="cat" onchange="render()"><option>IA de texto</option><option>IA de video</option><option>IA de imagen</option><option>IA de audio</option><option>IA de código</option><option>Otra</option></select></label>
+<label>¿VALE LA PENA? <b id="v1">7.0</b><input type="range" id="c1" min="0" max="10" step="0.5" value="7" oninput="render()"></label>
+<label>VERSIÓN GRATUITA <b id="v2">7.0</b><input type="range" id="c2" min="0" max="10" step="0.5" value="7" oninput="render()"></label>
+<label>¿PAGARÍAMOS? <b id="v3">7.0</b><input type="range" id="c3" min="0" max="10" step="0.5" value="7" oninput="render()"></label>
+<label>FACILIDAD DE USO <b id="v4">7.0</b><input type="range" id="c4" min="0" max="10" step="0.5" value="7" oninput="render()"></label>
+<label>RESULTADO FINAL <b id="v5">7.0</b><input type="range" id="c5" min="0" max="10" step="0.5" value="7" oninput="render()"></label>
+<label><input type="checkbox" id="autoScore" onchange="render()" style="width:auto"> PUNTUACIÓN MANUAL <b id="scoreOut">7.0</b><input type="range" id="mscore" min="0" max="10" step="0.1" value="7" oninput="render()" style="display:none"></label>
+<label>VEREDICTO<select id="verdict" onchange="render()"><option value="auto">AUTO (≥7 = 🟢)</option><option value="rec">🟢 RECOMENDADA</option><option value="norec">🔴 NO RECOMENDADA</option></select></label>
+<label>FRASE DE RB-01<select id="phrase" onchange="render()"><option>Evidencia suficiente.</option><option>Consenso detectado. Evidencia insuficiente.</option><option>Veredicto emitido.</option><option>Herramienta detectada. Análisis completo.</option><option>No seguimos el hype. La pusimos a prueba.</option><option value="custom">✏️ Personalizada...</option></select></label>
+<label id="phc" style="display:none">FRASE<input id="phraseCustom" oninput="render()" placeholder="Frase de cierre"></label>
+<label>FORMATO<select id="fmt" onchange="render()"><option value="169">16:9 VIDEO (1920×1080)</option><option value="11">1:1 REDES (1080×1080)</option></select></label>
+<button onclick="dl()">💾 DESCARGAR PNG</button>
+<button onclick="anim()">🎬 MODO ANIMADO (OBS)</button>
+</div>
+<div class="card"><h3>🗄️ HISTORIAL DE VEREDICTOS (futuro Ranking Rebelde)</h3><div id="hist" class="hist"></div></div>
+</div>
+<div class="card"><canvas id="cv" width="1920" height="1080"></canvas></div>
+</div>
+<div id="ovl" onclick="this.style.display='none'"><div class="scan"></div><img id="ovlimg"><div class="hint">[ CLIC O ESC PARA SALIR ]</div></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const P_HELM=new Path2D('M50 6C30 6 18 20 18 40v18l8 6v10l12 14h24l12-14V64l8-6V40C82 20 70 6 50 6z');
+const P_VIS=new Path2D('M26 38h48v16l-10 12H36L26 54z');
+const P_EYES=new Path2D('M32 44l14 4-13 4zM68 44l-14 4 13 4z');
+function fitText(t,px,maxW){let s=px;ctx.font=`700 ${s}px "Chakra Petch"`;while(ctx.measureText(t).width>maxW&&s>24){s-=2;ctx.font=`700 ${s}px "Chakra Petch"`}return s}
+function getState(){return{name:document.getElementById('name').value,cat:document.getElementById('cat').value,c:[1,2,3,4,5].map(i=>+document.getElementById('c'+i).value),man:document.getElementById('autoScore').checked,ms:+document.getElementById('mscore').value,ver:document.getElementById('verdict').value,ph:document.getElementById('phrase').value,phc:document.getElementById('phraseCustom').value,fmt:document.getElementById('fmt').value}}
+function render(){const st=getState();cv.width=st.fmt==='11'?1080:1920;cv.height=1080;const W=cv.width,H=cv.height,M=Math.round(W*0.05);
+ [1,2,3,4,5].forEach(i=>document.getElementById('v'+i).textContent=st.c[i-1].toFixed(1));
+ document.getElementById('mscore').style.display=st.man?'block':'none';
+ document.getElementById('phc').style.display=st.ph==='custom'?'block':'none';
+ const score=st.man?st.ms:st.c.reduce((a,b)=>a+b,0)/5;document.getElementById('scoreOut').textContent=score.toFixed(1);
+ const rec=st.ver==='auto'?score>=7:st.ver==='rec';const col=rec?'#22c55e':'#e10600';
+ ctx.fillStyle='#050505';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#e10600';ctx.lineWidth=4;ctx.strokeRect(18,18,W-36,H-36);
+ ctx.save();ctx.translate(M,56);ctx.scale(.95,.95);ctx.fillStyle='#f2f2f2';ctx.fill(P_HELM);ctx.fillStyle='#050505';ctx.fill(P_VIS);ctx.fillStyle='#e10600';ctx.fill(P_EYES);ctx.restore();
+ ctx.textBaseline='middle';ctx.textAlign='left';
+ ctx.font='700 54px "Chakra Petch"';ctx.fillStyle='#f5f5f5';ctx.fillText('VEREDICTO',M+115,103);
+ ctx.fillStyle='#e10600';ctx.fillText('REBELDE',M+115+ctx.measureText('VEREDICTO').width+22,103);
+ const nm=(st.name||'HERRAMIENTA').toUpperCase();const fs=fitText(nm,74,W-M*2);ctx.fillStyle='#f5f5f5';ctx.font=`700 ${fs}px "Chakra Petch"`;ctx.fillText(nm,M,225);
+ ctx.fillStyle='#e10600';ctx.font='28px "Share Tech Mono"';ctx.fillText('CATEGORÍA: '+st.cat.toUpperCase(),M,285);
+ const lbs=['¿VALE LA PENA?','VERSIÓN GRATUITA','¿PAGARÍAMOS?','FACILIDAD DE USO','RESULTADO FINAL'];
+ const y0=350,rh=78,labelW=Math.min(540,W*0.44),barX=M+labelW,barW=W-M*2-labelW-140;
+ lbs.forEach((lb,i)=>{const y=y0+i*rh;ctx.fillStyle='#cfcfcf';ctx.font='28px "Chakra Petch"';ctx.fillText(lb,M,y+13);
+  ctx.fillStyle='#1c1c1c';ctx.fillRect(barX,y,barW,26);ctx.fillStyle='#e10600';ctx.fillRect(barX,y,barW*st.c[i]/10,26);
+  ctx.textAlign='right';ctx.fillStyle='#e10600';ctx.font='28px "Share Tech Mono"';ctx.fillText(st.c[i].toFixed(1),W-M,y+13);ctx.textAlign='left'});
+ const yS=y0+5*rh+28;
+ ctx.fillStyle='#8a8a8a';ctx.font='26px "Share Tech Mono"';ctx.fillText('PUNTUACIÓN REBELDE',M,yS);
+ ctx.fillStyle=col;ctx.font='700 104px "Chakra Petch"';ctx.fillText(score.toFixed(1),M,yS+78);
+ const vt=rec?'RECOMENDADA':'NO RECOMENDADA';ctx.textAlign='right';ctx.fillStyle=col;ctx.font='700 60px "Chakra Petch"';ctx.fillText(vt,W-M,yS+72);
+ ctx.beginPath();ctx.arc(W-M-ctx.measureText(vt).width-46,yS+72,24,0,7);ctx.fill();ctx.textAlign='left';
+ const ph=st.ph==='custom'?st.phc:st.ph;ctx.fillStyle='#9a9a9a';ctx.font='28px "Chakra Petch"';ctx.fillText('"'+ph+'"',M,yS+165);
+ ctx.fillStyle='#666';ctx.font='24px "Share Tech Mono"';ctx.fillText('REBELDE IA · LA VERDAD DETRÁS DE LA IA',M,H-46);
+ ctx.textAlign='right';ctx.fillText(new Date().toLocaleDateString('es-AR'),W-M,H-46);ctx.textAlign='left'}
+function dl(){render();const a=document.createElement('a');a.download='VEREDICTO_'+((getState().name||'IA').toUpperCase().replace(/\s+/g,'_'))+'.png';a.href=cv.toDataURL('image/png');a.click();saveHist()}
+function saveHist(){const h=JSON.parse(localStorage.getItem('rbver')||'[]');h.unshift({d:new Date().toLocaleDateString('es-AR'),...getState()});localStorage.setItem('rbver',JSON.stringify(h.slice(0,50)));renderHist()}
+function renderHist(){const h=JSON.parse(localStorage.getItem('rbver')||'[]');document.getElementById('hist').innerHTML=h.map((e,i)=>`<div>${e.d} · <b style="color:#f5f5f5">${(e.name||'?').toUpperCase()}</b> · ${((e.man?e.ms:e.c.reduce((a,b)=>a+b,0)/5)).toFixed(1)} · <span style="color:${(e.ver==='auto'?(e.man?e.ms:e.c.reduce((a,b)=>a+b,0)/5)>=7:e.ver==='rec')?'#22c55e':'#e10600'}">${(e.ver==='auto'?(e.man?e.ms:e.c.reduce((a,b)=>a+b,0)/5)>=7:e.ver==='rec')?'🟢':'🔴'}</span> <button onclick="loadHist(${i})">ABRIR</button><button onclick="delHist(${i})">✕</button></div>`).join('')||'Sin veredictos guardados todavía.'}
+function loadHist(i){const e=JSON.parse(localStorage.getItem('rbver')||'[]')[i];if(!e)return;document.getElementById('name').value=e.name||'';document.getElementById('cat').value=e.cat;e.c.forEach((v,j)=>document.getElementById('c'+(j+1)).value=v);document.getElementById('autoScore').checked=e.man;document.getElementById('mscore').value=e.ms;document.getElementById('verdict').value=e.ver;document.getElementById('phrase').value=e.ph;document.getElementById('phraseCustom').value=e.phc;document.getElementById('fmt').value=e.fmt;render()}
+function delHist(i){const h=JSON.parse(localStorage.getItem('rbver')||'[]');h.splice(i,1);localStorage.setItem('rbver',JSON.stringify(h));renderHist()}
+function anim(){render();const o=document.getElementById('ovl');document.getElementById('ovlimg').src=cv.toDataURL();o.style.display='flex';const im=document.getElementById('ovlimg');im.classList.remove('anim');void im.offsetWidth;im.classList.add('anim')}
+window.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('ovl').style.display='none'});
+document.fonts.ready.then(render);render();renderHist();
+</script>
+</body>
+</html>
