@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REBELDE IA // RB-PROMPTS PRO</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#050505;color:#f5f5f5;font-family:'Chakra Petch',sans-serif}
+header{display:flex;align-items:center;justify-content:center;gap:14px;padding:24px 6vw;border-bottom:1px solid #222}
+header h1{font-size:22px;letter-spacing:3px;margin:0}header h1 span{color:#e10600}
+.tag{color:#8a8a8a;font-size:11px;letter-spacing:4px}
+.wrap{max-width:1500px;margin:26px auto;padding:0 20px;display:grid;grid-template-columns:420px 1fr;gap:18px}
+.card{background:#0d0d0d;border:1px solid #242424;border-left:3px solid #e10600;padding:16px}
+.card h3{margin:0 0 12px;font-size:14px;letter-spacing:2px;color:#e10600}
+label{display:block;margin:8px 0;color:#bbb;font-size:12px}
+select,input,textarea{width:100%;box-sizing:border-box;background:#0a0a0a;border:1px solid #2a2a2a;color:#f5f5f5;padding:9px;border-radius:4px;font-family:'Share Tech Mono',monospace}
+input[type=range]{accent-color:#e10600}
+button{background:#e10600;color:#fff;border:none;padding:10px 14px;border-radius:4px;font-weight:bold;cursor:pointer;font-family:'Chakra Petch';margin:4px 4px 0 0}
+button:hover{background:#ff1a1a}
+#out{background:#000;border:1px solid #2a2a2a;color:#39ff5a;font-family:'Share Tech Mono',monospace;font-size:14px;white-space:pre-wrap;min-height:220px;padding:14px}
+.lib{font-family:'Share Tech Mono',monospace;font-size:12px;color:#9a9a9a}
+.lib div{border-bottom:1px solid #1c1c1c;padding:6px 0;display:flex;gap:8px;align-items:center}
+.lib button{padding:2px 8px;margin:0;font-size:11px}
+.hide{display:none}
+@media(max-width:1000px){.wrap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<a href="../" style="position:fixed;top:12px;left:12px;z-index:99;color:#e10600;font-size:12px;letter-spacing:2px;text-decoration:none;border:1px solid #e10600;padding:6px 12px;background:#050505">← HUB</a>
+<header>
+<svg viewBox="0 0 100 100" width="38" height="38"><path fill="#f2f2f2" d="M50 6C30 6 18 20 18 40v18l8 6v10l12 14h24l12-14V64l8-6V40C82 20 70 6 50 6z"/><path fill="#0a0a0a" d="M26 38h48v16l-10 12H36L26 54z"/><path fill="#e10600" d="M32 44l14 4-13 4zM68 44l-14 4 13 4z"/></svg>
+<div><h1>REBELDE <span>IA</span> // RB-PROMPTS PRO</h1><div class="tag">CONSOLA DE PROMPTS POR CAPAS</div></div>
+</header>
+<div class="wrap">
+<div>
+<div class="card"><h3>🧬 CAPA 1 · IDENTIDAD</h3>
+<label>PERSONAJE<select id="char" onchange="vis();build()"><option value="vera">VERA</option><option value="rb01">RB-01</option><option value="kavya">KAVYA</option><option value="custom">PERSONAJE LIBRE</option></select></label>
+<div id="descBox" class="hide"><label>DESCRIPCIÓN CANÓNICA<textarea id="descCustom" oninput="build()" placeholder="Pelo, ojos, ropa, tatuajes..."></textarea></label></div>
+</div>
+<div class="card"><h3>🎬 CAPA 2 · CATEGORÍA</h3>
+<label>CATEGORÍA<select id="cat" onchange="vis();build()"><option value="imagen">IMAGEN</option><option value="video">VIDEO</option><option value="miniatura">MINIATURA</option><option value="musica">MÚSICA (Suno/Udio)</option><option value="voz">VOZ (ElevenLabs)</option></select></label>
+<label id="engBox">MOTOR<select id="eng" onchange="build()"><option value="flow">FLOW / VEO (con referencia)</option><option value="chatgpt">CHATGPT / DALL-E</option><option value="midjourney">MIDJOURNEY</option><option value="sd">STABLE DIFFUSION / FLUX</option></select></label>
+</div>
+<div class="card" id="visBox"><h3>📷 CAPA 3 · ESCENA Y CÁMARA</h3>
+<label>PLANO<select id="shot" onchange="build()"><option>extreme macro crop</option><option selected>close-up, head and shoulders ONLY</option><option>medium shot</option><option>medium full shot</option><option>full body from head to boots</option></select></label>
+<label>ACCIÓN<select id="act" onchange="build()"><option>stands completely still facing camera</option><option>walks confidently toward camera</option><option>looks into the lens and speaks</option><option>turns slowly to face camera</option><option>crosses the arms with a confident pose</option><option>tilts the head slightly, analyzing</option></select></label>
+<label>CÁMARA<select id="cam" onchange="build()"><option selected>locked camera</option><option>slow push-in</option><option>slow pull-back</option><option>subtle orbit</option></select></label>
+<label>FONDO<select id="bg" onchange="build()"><option selected>neutral light gray studio background</option><option>dark industrial environment with faint red rim light</option><option>night city street with neon reflections</option><option>pure black background</option></select></label>
+<label>DIÁLOGO (opcional)<input id="dlg" oninput="build()" placeholder="Y esto... recién empieza."></label>
+<label><input type="checkbox" id="cont" onchange="build()" style="width:auto"> CONTINUACIÓN (frame chaining)</label>
+<label>FORMATO<select id="ar" onchange="build()"><option>16:9</option><option>9:16</option><option>1:1</option><option>3:4</option></select></label>
+</div>
+<div class="card hide" id="thumbBox"><h3>🖼️ MINIATURA</h3>
+<label>TEXTO (MÁX. 3 PALABRAS) <b id="tw" style="color:#e10600"></b><input id="thumb" oninput="build()" placeholder="NO PAGUES"></label>
+</div>
+<div class="card hide" id="musBox"><h3>🎹 MÚSICA</h3>
+<label>ESTILO<select id="mstyle" onchange="build()"><option>Blade Runner analog Vangelis pads</option><option>industrial dark techno</option><option>ambient terminal hum</option><option>tense investigation synth</option></select></label>
+<label>BPM <b id="bpmv">70</b><input type="range" id="bpm" min="50" max="150" value="70" oninput="document.getElementById('bpmv').textContent=this.value;build()"></label>
+<label>DURACIÓN<select id="dur" onchange="build()"><option>30</option><option selected>60</option><option>90</option></select></label>
+</div>
+<div class="card hide" id="vozBox"><h3>🎙️ VOZ</h3>
+<label id="voiceCustomBox" class="hide">DESCRIPCIÓN DE VOZ<textarea id="voiceCustom" oninput="build()" placeholder="Tono, edad, acento, procesamiento..."></textarea></label>
+</div>
+</div>
+<div>
+<div class="card"><h3>📤 PROMPT ENSAMBLADO</h3>
+<div id="out"></div>
+<button onclick="copyOut()">📋 COPIAR</button>
+<button onclick="saveLib()">⭐ GUARDAR EN BIBLIOTECA</button>
+</div>
+<div class="card"><h3>🗄️ BIBLIOTECA</h3><div id="lib" class="lib"></div></div>
+</div>
+</div>
+<script>
+const CHARS={
+vera:{n:'Vera',desc:'Vera, 25-year-old woman, long wavy copper-red hair, green eyes, tanned skin with freckles, silver septum piercing, floral black-ink tattoos on both arms, fitted black short-sleeve t-shirt, black leather mini skirt with grommet belt and silver buckle, layered gold coin necklaces, black platform combat boots',voice:'Young Latina woman, 25 years old. Warm and confident voice, slightly playful and ironic undertone, soft Latin American Spanish accent, clear and natural, mid-range pitch, like a content creator talking directly to her audience.'},
+rb01:{n:'RB-01',desc:'RB-01, humanoid analyst robot: glossy white armored helmet with angular panels, full-face black glass visor with red LED dot-matrix display, circular black ear modules with glowing red ring, exposed black mechanical neck with chrome pistons, black hoodie with red drawstrings, red brushstroke IA logo on left sleeve, white and black robotic hands, always serious and still',voice:'Male voice, 40 years old, calm deep controlled tone, neutral Latin American Spanish, precise diction, minimal emotion, documentary style. Processing: -2 semitones, light vocoder 7%, soft saturation, short room reverb (90% human, 10% machine).'},
+kavya:{n:'Kavya',desc:'',voice:''},custom:{n:'Personaje',desc:'',voice:''}};
+const $=id=>document.getElementById(id);
+function vis(){const c=$('cat').value,ch=$('char').value;
+ $('visBox').classList.toggle('hide',c==='musica'||c==='voz'||c==='miniatura');
+ $('thumbBox').classList.toggle('hide',c!=='miniatura');
+ $('musBox').classList.toggle('hide',c!=='musica');
+ $('vozBox').classList.toggle('hide',c!=='voz');
+ $('engBox').classList.toggle('hide',c==='musica'||c==='voz');
+ $('descBox').classList.toggle('hide',!(ch==='kavya'||ch==='custom'));
+ $('voiceCustomBox').classList.toggle('hide',!(c==='voz'&&(ch==='kavya'||ch==='custom')))}
+function build(){const c=$('cat').value,ch=$('char').value,eng=$('eng').value;
+ const C=CHARS[ch],free=(ch==='kavya'||ch==='custom');
+ const desc=free?($('descCustom').value||'the exact character from the reference image'):C.desc;
+ let out='';
+ if(c==='musica'){out=`Dark cinematic electronic track, ${$('mstyle').value}, ${$('bpm').value} BPM, ${$('dur').value} seconds, deep sub bass, analog synth pads, subtle tape hiss, no vocals, tense and mysterious, cinematic mix.`}
+ else if(c==='voz'){out=`Voice design prompt (ElevenLabs):\n${free?($('voiceCustom').value||'Describí la voz...'):C.voice}`}
+ else if(c==='miniatura'){const w=$('thumb').value.trim().split(/\s+/).filter(Boolean);$('tw').textContent=w.length>3?`⚠️ ${w.length}/3`:'';
+  const base=`YouTube thumbnail, pure black background, RB-01 robot on the right side, arms crossed, white helmet with red LED visor, red rim light, on the left side giant bold text "${$('thumb').value.toUpperCase()}" in white with one word in red, minimalist brutalist style, no emojis, no arrows, no exaggerated faces`;
+  out=eng==='midjourney'?base+' --ar 16:9 --style raw --v 6':base+'. High contrast, 1280x720.';
+  if(w.length>3)out+='\n⚠️ REGLA REBELDE: MÁXIMO 3 PALABRAS.'}
+ else{const dlg=$('dlg').value?` and says: "${$('dlg').value}" with clear natural lip sync`:'';
+  const cont=$('cont').checked?'Seamless continuation from the exact reference frame: same framing, same lighting, do not change the shot scale. ':'';
+  const ar=$('ar').value;
+  if(eng==='flow'){const extra=c==='video'?'photorealistic, 4K, temporal stability.':'photorealistic, sharp natural detail.';
+   out=`${cont}Same character as in the reference image. ${$('shot').value}, ${$('cam').value}. ${C.n} ${$('act').value}${dlg}. ${$('bg').value}, soft even lighting, ${extra}`}
+  else if(eng==='chatgpt'){out=`${cont}Photorealistic ${$('shot').value} of ${desc}. The subject ${$('act').value}${dlg}. ${$('cam').value==='locked camera'?'':$('cam').value+'. '}${$('bg').value}, soft cinematic lighting, raw photograph${c==='video'?', suitable for image-to-video animation':''}.`}
+  else if(eng==='midjourney'){out=`${desc}, ${$('act').value}, ${$('shot').value}, ${$('cam').value}, ${$('bg').value}, photorealistic, raw style --ar ${ar} --style raw --v 6`}
+  else{out=`${desc}, ${$('act').value}, ${$('shot').value}, ${$('cam').value}, ${$('bg').value}, raw photograph, 85mm lens, detailed skin texture, sharp focus, 8k`}}
+ $('out').textContent=out}
+function copyOut(){navigator.clipboard.writeText($('out').textContent)}
+function saveLib(){const h=JSON.parse(localStorage.getItem('rbprompts')||'[]');h.unshift({tag:`${$('char').value.toUpperCase()}·${$('cat').value.toUpperCase()}·${new Date().toLocaleDateString('es-AR')}`,text:$('out').textContent});localStorage.setItem('rbprompts',JSON.stringify(h.slice(0,60)));renderLib()}
+function renderLib(){const h=JSON.parse(localStorage.getItem('rbprompts')||'[]');$('lib').innerHTML=h.map((e,i)=>`<div><b style="color:#f5f5f5">${e.tag}</b> <button onclick="copyLib(${i})">📋</button><button onclick="delLib(${i})">✕</button></div>`).join('')||'Biblioteca vacía.'}
+function copyLib(i){navigator.clipboard.writeText(JSON.parse(localStorage.getItem('rbprompts')||'[]')[i].text)}
+function delLib(i){const h=JSON.parse(localStorage.getItem('rbprompts')||'[]');h.splice(i,1);localStorage.setItem('rbprompts',JSON.stringify(h));renderLib()}
+vis();build();renderLib();
+</script>
+</body>
+</html>
