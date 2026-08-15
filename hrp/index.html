@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REBELDE IA // CONSTRUCTOR HRP</title>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Share+Tech+Mono&display=swap');
+:root{--bg:#050505;--card:#0d0d0d;--accent:#e10600;--text:#f5f5f5;--line:#242424}
+body{font-family:'Chakra Petch',sans-serif;background:var(--bg);color:var(--text);margin:0;padding:20px}
+.container{max-width:1700px;margin:auto}
+h1{text-align:center;color:var(--text);letter-spacing:3px}h1 span{color:var(--accent)}
+.controls{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);padding:15px;border-radius:6px;margin-bottom:15px;display:flex;flex-direction:column;gap:10px}
+button{background:var(--accent);color:#fff;border:none;padding:8px 14px;border-radius:4px;font-weight:bold;cursor:pointer;font-size:12px;font-family:'Chakra Petch'}
+button:hover{background:#ff1a1a}
+select,input[type=text]{padding:8px;background:#0a0a0a;border:1px solid #2a2a2a;color:#fff;border-radius:4px}
+.workspace{display:grid;grid-template-columns:420px 1fr;gap:20px;align-items:start}
+.rightcol{position:sticky;top:10px}
+canvas{display:block;width:100%;border:1px solid var(--line);background:#fff;cursor:move}
+.panel{background:#0a0a0a;border:1px solid var(--line);border-radius:6px;padding:10px;font-size:12px;margin-bottom:8px}
+.panel h4{margin:0 0 6px;color:var(--accent);font-size:12px;letter-spacing:1px}
+.panel label{display:block;margin:4px 0;color:#bbb}
+.panel input[type=range]{width:100%;accent-color:var(--accent)}
+.prompt-box{background:#000;color:#ddd;padding:10px;border-radius:4px;font-family:'Share Tech Mono',monospace;white-space:pre-wrap;font-size:10px;margin-top:6px}
+.calbox{border:2px solid var(--accent);border-radius:6px;padding:10px;background:rgba(225,6,0,.06);font-size:12px}
+.calbox label{display:block;margin-bottom:6px;color:#ffb3b0}
+#log{background:#000;color:#e10600;padding:10px;border-radius:4px;font-family:'Share Tech Mono',monospace;height:80px;overflow-y:auto;font-size:11px}
+@media(max-width:1100px){.workspace{grid-template-columns:1fr}.rightcol{position:static}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1><svg viewBox="0 0 100 100" width="34" height="34" style="vertical-align:middle"><path fill="#f2f2f2" d="M50 6C30 6 18 20 18 40v18l8 6v10l12 14h24l12-14V64l8-6V40C82 20 70 6 50 6z"/><path fill="#0a0a0a" d="M26 38h48v16l-10 12H36L26 54z"/><path fill="#e10600" d="M32 44l14 4-13 4zM68 44l-14 4 13 4z"/></svg> REBELDE <span>IA</span> // CONSTRUCTOR HRP</h1>
+<div class="controls">
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+<input type="text" id="char-desc" placeholder="Descripción (solo para modo ChatGPT/Midjourney)" style="flex:1">
+<select id="pmode" onchange="mods.forEach((m,i)=>updPrompt(i))">
+<option value="flow">🎬 Prompts modo FLOW (con referencia)</option>
+<option value="txt">📝 Prompts modo CHATGPT/MJ (texto completo)</option>
+</select>
+<select id="addsel"></select>
+<button onclick="addMod()">➕ Añadir módulo</button>
+<button onclick="autoCal()">⚙️ Auto-calibrar caras 1:1</button>
+<button onclick="downloadSheet()">💾 Exportar Hoja 4K (limpia)</button>
+</div>
+<div id="log">[Sistema] Cargando modelos de IA...</div>
+</div>
+<div class="workspace">
+<div class="leftcol">
+<div class="controls calbox">
+<label><input type="checkbox" id="calchk" onchange="setCal(this.checked)"> 🎯 BANDA ROJA 1:1</label>
+<label>↕️ Posición Y de la banda: <b id="cvy">300</b><input type="range" min="0" max="2000" step="5" value="300" oninput="setCalY(this.value)" style="accent-color:#e10600"></label>
+</div>
+<div class="controls">
+<label style="font-size:12px;color:#bbb">🏷️ Rótulo: <input type="text" id="lbl" placeholder="Nombre (opcional)" oninput="render()" style="width:120px"> Opacidad: <input type="range" id="lblop" min="0" max="100" value="0" oninput="render()" style="width:80px;vertical-align:middle"></label>
+</div>
+<div id="panels"></div>
+</div>
+<div class="rightcol">
+<div class="controls">
+<h3 style="margin:0">Lienzo 4K fijo — arrastrá recuadros, rueda = zoom de imagen</h3>
+<canvas id="sheet-canvas" width="3840" height="2160"></canvas>
+</div>
+</div>
+</div>
+</div>
+<script>
+const TYPES=[
+{n:'Busto Frontal (Ancla)',f:1,fw:1100,fh:1400,
+p:'Exact 1:1 physical clone of [P], front bust portrait, maximum skin texture, pores, freckles, neutral light gray studio background, 85mm lens, raw photograph.',
+pr:'Same character as in the reference image. Close-up front bust portrait, head and shoulders ONLY, face centered and filling the frame, looking at camera, subtle smile. Neutral light gray studio background, photorealistic, sharp natural skin texture.'},
+{n:'Perfil Derecho 90°',f:1,fw:1000,fh:1000,
+p:'Exact 1:1 physical clone of [P], right side profile 90 degrees, jawline and ear alignment, neutral gray studio background, raw photograph.',
+pr:'Same character as in the reference image. Close-up RIGHT side profile portrait, exactly 90 degrees, head and shoulders ONLY, face filling the frame. Neutral gray studio background, photorealistic.'},
+{n:'Perfil Izquierdo 90°',f:1,fw:1000,fh:1000,
+p:'Exact 1:1 physical clone of [P], left side profile 90 degrees, skull structure, neutral gray studio background, raw photograph.',
+pr:'Same character as in the reference image. Close-up LEFT side profile portrait, exactly 90 degrees, head and shoulders ONLY, face filling the frame. Neutral gray studio background, photorealistic.'},
+{n:'Vista 3/4 Derecha',f:1,fw:1000,fh:1200,
+p:'Exact 1:1 physical clone of [P], three-quarter view turned 45 degrees right, neutral gray studio background, raw photograph.',
+pr:'Same character as in the reference image. Close-up three-quarter portrait turned 45 degrees to the RIGHT, head and shoulders ONLY. Neutral gray studio background, photorealistic.'},
+{n:'Vista 3/4 Izquierda',f:1,fw:1000,fh:1200,
+p:'Exact 1:1 physical clone of [P], three-quarter view turned 45 degrees left, neutral gray studio background, raw photograph.',
+pr:'Same character as in the reference image. Close-up three-quarter portrait turned 45 degrees to the LEFT, head and shoulders ONLY. Neutral gray studio background, photorealistic.'},
+{n:'Busto Espalda',f:0,fw:1000,fh:1200,
+p:'Exact clone of [P], back of head and shoulders, full hair volume, neutral gray studio background, raw photograph.',
+pr:'Same character as in the reference image. Close-up back view of head and shoulders, full hair volume, no face visible. Neutral gray studio background, photorealistic.'},
+{n:'Cuerpo Frente (sin cabeza)',f:0,fw:700,fh:1500,
+p:'NO HEAD, NO NECK. Headless full body front view of [P], clean crop at collar seam, neutral pose, outfit strictly matching reference.',
+pr:'Same character and exact same outfit as in the reference image. Headless full body front view: NO HEAD, clean crop at the collar, from shoulders down to the boots, filling the frame vertically. Neutral gray studio background, photorealistic.'},
+{n:'Cuerpo Espalda',f:0,fw:700,fh:1500,
+p:'Full body back view of [P], no backpack, back of exact outfit, neutral gray studio background.',
+pr:'Same character and exact same outfit as in the reference image. Full body back view from the top of the head down to the boots, no backpack. Neutral gray studio background, photorealistic.'},
+{n:'Cuerpo Perfil (lado)',f:0,fw:700,fh:1500,
+p:'Full body side profile view of [P], complete outfit and footwear, neutral gray studio background.',
+pr:'Same character and exact same outfit as in the reference image. Full body side profile view from head to boots. Neutral gray studio background, photorealistic.'},
+{n:'Panel 6 Expresiones',f:0,fw:1400,fh:900,
+p:'Grid of 6 key expressions of [P]: neutral, joy, anger, sadness, surprise, disgust. Same exact face in all, neutral gray background.',
+pr:'Same character as in the reference image. Contact sheet grid of 6 close-up face portraits, head and shoulders ONLY: neutral, joy, anger, sadness, surprise, disgust. Same face in all. Neutral gray background, photorealistic.'},
+{n:'Macro Ojos e Iris',f:0,fw:900,fh:600,
+p:'Extreme macro of both eyes of [P], iris texture, eyelashes, micro-detail, raw photograph.',
+pr:'Same character as in the reference image. Extreme macro crop showing ONLY both eyes, iris texture and eyelashes, nothing else in frame. Photorealistic micro-detail.'},
+{n:'Macro Manos',f:0,fw:900,fh:700,
+p:'Close-up of both hands of [P] relaxed, anatomically correct fingers, nails, rings, raw photograph.',
+pr:'Same character as in the reference image. Close-up of both hands relaxed, showing fingers, nails, rings and bracelets, same jewelry as reference. Photorealistic.'}];
+let mods=[],sel=-1,drag=null,guides={x:null,y:null},cloneSrc=-1,showCal=false,calY=300;
+const cv=document.getElementById('sheet-canvas'),ctx=cv.getContext('2d');
+document.getElementById('addsel').innerHTML=TYPES.map((t,i)=>`<option value="${i}">${t.n}</option>`).join('');
+const log=m=>{const l=document.getElementById('log');l.innerHTML+='<br>'+m;l.scrollTop=l.scrollHeight};
+function setCal(v){showCal=v;render()}
+function setCalY(v){calY=+v;document.getElementById('cvy').textContent=v;render()}
+async function init(){try{const U='https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';await faceapi.nets.tinyFaceDetector.loadFromUri(U);await faceapi.nets.faceLandmark68Net.loadFromUri(U);log('[Éxito] IA cargada.')}catch(e){log('[Error] modelos IA.')}}
+init();
+function addMod(){const t=+document.getElementById('addsel').value;mods.push({t,img:null,m:null,s:0.5,ox:0,oy:0,x:150+mods.length*90,y:120+mods.length*70,w:TYPES[t].fw,h:TYPES[t].fh});buildPanels();render();log('Módulo añadido: '+TYPES[t].n)}
+function buildPanels(){document.getElementById('panels').innerHTML=mods.map((mo,i)=>`
+<div class="panel"><h4>🎛️ M${i+1} — ${TYPES[mo.t].n}</h4>
+<input type="file" accept="image/*" onchange="loadMod(${i},this)">
+<label>🔍 Zoom imagen: <b id="z${i}">${mo.s.toFixed(3)}</b>x<input type="range" id="zi${i}" min="0.05" max="3" step="0.005" value="${mo.s}" oninput="setM(${i},'s',this.value)"></label>
+<label>↔️ Encuadre X: <b id="x${i}">${Math.round(mo.ox)}</b><input type="range" id="xi${i}" min="-1500" max="1500" step="2" value="${mo.ox}" oninput="setM(${i},'ox',this.value)"></label>
+<label>↕️ Encuadre Y: <b id="y${i}">${Math.round(mo.oy)}</b><input type="range" id="yi${i}" min="-1500" max="1500" step="2" value="${mo.oy}" oninput="setM(${i},'oy',this.value)"></label>
+<label>⬛ Ancho recuadro: <b id="w${i}">${mo.w}</b><input type="range" id="wi${i}" min="200" max="2400" step="10" value="${mo.w}" oninput="setM(${i},'w',this.value)"></label>
+<label>⬛ Alto recuadro: <b id="h${i}">${mo.h}</b><input type="range" id="hi${i}" min="200" max="2100" step="10" value="${mo.h}" oninput="setM(${i},'h',this.value)"></label>
+<button onclick="cloneSrc=${i};log('Tamaño de recuadro M${i+1} listo para clonar.')">= Fuente</button>
+<button onclick="applyClone(${i})">📏 Pegar tamaño</button>
+<button onclick="delMod(${i})">🗑️</button>
+<div class="prompt-box" id="pp${i}"></div><button onclick="copyP(${i})">📋 Copiar prompt</button>
+</div>`).join('');mods.forEach((mo,i)=>updPrompt(i))}
+function updPrompt(i){const el=document.getElementById('pp'+i);if(!el)return;const mode=document.getElementById('pmode').value;const t=TYPES[mods[i].t];el.textContent=mode==='flow'?t.pr:t.p.replace('[P]',document.getElementById('char-desc').value||'the reference character')}
+function copyP(i){updPrompt(i);navigator.clipboard.writeText(document.getElementById('pp'+i).textContent);log('Prompt copiado (modo '+document.getElementById('pmode').value+').')}
+document.getElementById('char-desc').addEventListener('input',()=>mods.forEach((m,i)=>updPrompt(i)));
+function setM(i,k,v){mods[i][k]=parseFloat(v);sync(i);render()}
+function sync(i){const mo=mods[i];document.getElementById('zi'+i).value=mo.s;document.getElementById('xi'+i).value=mo.ox;document.getElementById('yi'+i).value=mo.oy;document.getElementById('wi'+i).value=mo.w;document.getElementById('hi'+i).value=mo.h;document.getElementById('z'+i).textContent=mo.s.toFixed(3);document.getElementById('x'+i).textContent=Math.round(mo.ox);document.getElementById('y'+i).textContent=Math.round(mo.oy);document.getElementById('w'+i).textContent=Math.round(mo.w);document.getElementById('h'+i).textContent=Math.round(mo.h)}
+function applyClone(i){if(cloneSrc<0)return;mods[i].w=mods[cloneSrc].w;mods[i].h=mods[cloneSrc].h;sync(i);render();log('Tamaño de recuadro clonado a M'+(i+1))}
+function delMod(i){mods.splice(i,1);sel=-1;cloneSrc=-1;buildPanels();render()}
+function loadMod(i,input){if(!input.files[0])return;const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=async()=>{mods[i].img=img;const mo=mods[i];if(TYPES[mo.t].f){mo.m=await getFaceMetrics(img);if(mo.m){mo.s=600/mo.m.h;mo.ox=(img.width/2-mo.m.cx)*mo.s;mo.oy=(img.height/2-mo.m.cy)*mo.s;log('M'+(i+1)+' auto-calibrado y centrado.')}}else{mo.s=Math.min(mo.w/img.width,mo.h/img.height);mo.ox=0;mo.oy=0}sync(i);render()};img.src=e.target.result};r.readAsDataURL(input.files[0])}
+async function getFaceMetrics(img){const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);const d=await faceapi.detectSingleFace(c,new faceapi.TinyFaceDetectorOptions({inputSize:512,scoreThreshold:0.3})).withFaceLandmarks();if(!d)return null;const p=d.landmarks.positions,t=p[27],b=p[8];return{h:Math.abs(b.y-t.y),cx:(t.x+b.x)/2,cy:(t.y+b.y)/2}}
+function autoCal(){let n=0;mods.forEach((mo,i)=>{if(mo.img&&mo.m&&TYPES[mo.t].f){mo.s=600/mo.m.h;mo.ox=(mo.img.width/2-mo.m.cx)*mo.s;mo.oy=(mo.img.height/2-mo.m.cy)*mo.s;sync(i);n++}});render();log('Caras calibradas 1:1: '+n)}
+function cPos(e){const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*(cv.width/r.width),y:(e.clientY-r.top)*(cv.height/r.height)}}
+cv.addEventListener('mousedown',e=>{const p=cPos(e);drag=null;for(let i=mods.length-1;i>=0;i--){const mo=mods[i];if(p.x>=mo.x&&p.x<=mo.x+mo.w&&p.y>=mo.y&&p.y<=mo.y+mo.h){sel=i;drag={i,ox:p.x-mo.x,oy:p.y-mo.y};break}}if(!drag)sel=-1;render()});
+cv.addEventListener('mousemove',e=>{if(!drag)return;const p=cPos(e),mo=mods[drag.i];let nx=p.x-drag.ox,ny=p.y-drag.oy;guides={x:null,y:null};const cx=nx+mo.w/2,cy=ny+mo.h/2;const tx=[cv.width/2],ty=[cv.height/2];mods.forEach((o,j)=>{if(j!==drag.i){tx.push(o.x+o.w/2,o.x,o.x+o.w);ty.push(o.y+o.h/2,o.y,o.y+o.h)}});for(const v of tx){if(Math.abs(cx-v)<30){nx=v-mo.w/2;guides.x=v;break}}for(const v of ty){if(Math.abs(cy-v)<30){ny=v-mo.h/2;guides.y=v;break}}mo.x=nx;mo.y=ny;render()});
+window.addEventListener('mouseup',()=>{drag=null;guides={x:null,y:null};render()});
+cv.addEventListener('wheel',e=>{const p=cPos(e);for(let i=mods.length-1;i>=0;i--){const mo=mods[i];if(p.x>=mo.x&&p.x<=mo.x+mo.w&&p.y>=mo.y&&p.y<=mo.y+mo.h){e.preventDefault();mo.s*=e.deltaY<0?1.05:0.95;sync(i);render();break}}},{passive:false});
+function render(){ctx.clearRect(0,0,3840,2160);ctx.fillStyle='#f1f5f9';ctx.fillRect(0,0,3840,2160);
+ mods.forEach((mo,i)=>{if(!mo.img)return;ctx.save();ctx.beginPath();ctx.rect(mo.x,mo.y,mo.w,mo.h);ctx.clip();const dw=mo.img.width*mo.s,dh=mo.img.height*mo.s;ctx.drawImage(mo.img,mo.x+mo.w/2+mo.ox-dw/2,mo.y+mo.h/2+mo.oy-dh/2,dw,dh);ctx.restore();if(i===sel){ctx.strokeStyle='#e10600';ctx.lineWidth=8;ctx.strokeRect(mo.x,mo.y,mo.w,mo.h)}});
+ if(drag){ctx.strokeStyle='#facc15';ctx.lineWidth=5;ctx.setLineDash([20,15]);if(guides.x){ctx.beginPath();ctx.moveTo(guides.x,0);ctx.lineTo(guides.x,2160);ctx.stroke()}if(guides.y){ctx.beginPath();ctx.moveTo(0,guides.y);ctx.lineTo(3840,guides.y);ctx.stroke()}ctx.setLineDash([])}
+ if(showCal){const fm=mods.find(mo=>mo.m&&mo.img);if(fm){const D=fm.m.h*fm.s;ctx.fillStyle='rgba(225,6,0,0.22)';ctx.fillRect(0,calY,3840,D);ctx.strokeStyle='#e10600';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(0,calY);ctx.lineTo(3840,calY);ctx.moveTo(0,calY+D);ctx.lineTo(3840,calY+D);ctx.stroke()}}
+ const op=+document.getElementById('lblop').value/100,txt=document.getElementById('lbl').value;
+ if(op>0&&txt){ctx.globalAlpha=op;ctx.fillStyle='#334155';ctx.font='bold 70px sans-serif';ctx.textAlign='center';ctx.fillText(txt,1920,120);ctx.textAlign='left';ctx.globalAlpha=1}}
+function downloadSheet(){const s=sel;sel=-1;const sc=showCal;showCal=false;render();const a=document.createElement('a');a.download='Hoja_Personaje_4K.png';a.href=cv.toDataURL('image/png');a.click();showCal=sc;sel=s;render()}
+</script>
+</body>
+</html>
