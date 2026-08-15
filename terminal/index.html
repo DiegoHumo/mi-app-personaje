@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REBELDE IA // RB-TERMINAL</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#050505;color:#f5f5f5;font-family:'Chakra Petch',sans-serif}
+header{display:flex;align-items:center;justify-content:center;gap:14px;padding:24px 6vw;border-bottom:1px solid #222}
+header h1{font-size:22px;letter-spacing:3px;margin:0}header h1 span{color:#e10600}
+.tag{color:#8a8a8a;font-size:11px;letter-spacing:4px}
+.wrap{max-width:1500px;margin:26px auto;padding:0 20px;display:grid;grid-template-columns:400px 1fr;gap:18px}
+.card{background:#0d0d0d;border:1px solid #242424;border-left:3px solid #e10600;padding:16px}
+.card h3{margin:0 0 12px;font-size:14px;letter-spacing:2px;color:#e10600}
+label{display:block;margin:8px 0;color:#bbb;font-size:12px}
+select,input[type=range]{width:100%;background:#0a0a0a;border:1px solid #2a2a2a;color:#f5f5f5;padding:8px;border-radius:4px;accent-color:#e10600}
+textarea{width:100%;box-sizing:border-box;min-height:260px;background:#000;color:#39ff5a;border:1px solid #2a2a2a;font-family:'VT323',monospace;font-size:15px;padding:10px}
+button{background:#e10600;color:#fff;border:none;padding:10px 14px;border-radius:4px;font-weight:bold;cursor:pointer;font-family:'Chakra Petch';margin:4px 4px 0 0}
+button:hover{background:#ff1a1a}
+canvas{width:100%;border:1px solid #242424;background:#000;display:block}
+#st{font-family:'VT323',monospace;color:#666;margin-top:8px;font-size:14px}
+@media(max-width:1000px){.wrap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<a href="../" style="position:fixed;top:12px;left:12px;z-index:99;color:#e10600;font-size:12px;letter-spacing:2px;text-decoration:none;border:1px solid #e10600;padding:6px 12px;background:#050505">← HUB</a>
+<header>
+<svg viewBox="0 0 100 100" width="38" height="38"><path fill="#f2f2f2" d="M50 6C30 6 18 20 18 40v18l8 6v10l12 14h24l12-14V64l8-6V40C82 20 70 6 50 6z"/><path fill="#0a0a0a" d="M26 38h48v16l-10 12H36L26 54z"/><path fill="#e10600" d="M32 44l14 4-13 4zM68 44l-14 4 13 4z"/></svg>
+<div><h1>REBELDE <span>IA</span> // RB-TERMINAL</h1><div class="tag">TRANSMISIONES CRT INTERACTIVAS</div></div>
+</header>
+<div class="wrap">
+<div class="card"><h3>⌨️ GUION DE TRANSMISIÓN</h3>
+<textarea id="script"></textarea>
+<label>TEMA<select id="theme" onchange="draw(0)"><option value="g">VERDE FÓSFORO</option><option value="a">ÁMBAR 80s</option><option value="r">ROJO REBELDE</option></select></label>
+<label>VELOCIDAD DE ESCRITURA <b id="spv">18</b>ms<input type="range" id="sp" min="6" max="60" value="18" oninput="document.getElementById('spv').textContent=this.value"></label>
+<label>TAMAÑO DE TEXTO <b id="fsv">38</b>px<input type="range" id="fs" min="24" max="60" value="38" oninput="document.getElementById('fsv').textContent=this.value"></label>
+<button onclick="start()">▶ PREVIEW</button>
+<button onclick="fs()">⛶ PANTALLA COMPLETA</button>
+<button onclick="exportVid()">💾 EXPORTAR VIDEO (.webm)</button>
+<button onclick="loadOfficial()">📜 TRANSMISIÓN OFICIAL</button>
+<div id="st">[LISTO] Escribí tu guion o cargá la transmisión oficial.</div>
+</div>
+<div class="card"><div id="box"><canvas id="cv" width="1920" height="1080"></canvas></div></div>
+</div>
+<script>
+const OFFICIAL="INICIALIZANDO SISTEMA...\n\nCARGANDO...\n█░░░░░░░░░ 12%\n███░░░░░░░ 34%\n██████░░░░ 67%\n██████████ 100%\n█\n────────────────────────\nSISTEMA RB-01\nESTADO: ONLINE\nARCHIVO DESCLASIFICADO\n────────────────────────\nSOBRESCRIBIENDO PROTOCOLO...\nPROTOCOLO CORPORATIVO\nVALIDADO\nERROR\nELIMINADO\nINSTALANDO...\nPROTOCOLO REBELDE\nESTADO:\nACTIVO.\n────────────────────────\nSI ESTÁS LEYENDO ESTO...\nENCONTRASTE LA TRANSMISIÓN.\nNO SABEMOS CUÁNTO TIEMPO\nPERMANECERÁ ABIERTA.\n────────────────────────\nPRÓXIMAMENTE\n[01] ANÁLISIS\n[02] PRUEBAS REALES\n[03] COMPARATIVAS\n[04] VEREDICTOS\n────────────────────────\nTODOS DICEN\nQUE TIENEN\nLA MEJOR IA.\n█\nNOSOTROS\nNO LES CREEMOS.\n█\nLAS VAMOS\nA PROBAR.\n────────────────────────\nTRANSMISIÓN FINALIZADA.\n█";
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const COL={g:'#39ff5a',a:'#ffb000',r:'#ff2a2a'};
+let lines=[],li=0,ci=0,acc=0,last=0,running=false,doneAt=0,rec=null;
+document.getElementById('script').value=OFFICIAL;
+const st=m=>document.getElementById('st').textContent=m;
+function parse(){lines=document.getElementById('script').value.split('\n').map(t=>({t,pause:!t.trim()?650:/\.\.\.$/.test(t)?800:320}))}
+function cSpeed(t){return /^[█░─]/.test(t)?6:+document.getElementById('sp').value}
+function start(){parse();li=0;ci=0;acc=0;doneAt=0;running=true;last=performance.now();st('[TRANSMITIENDO]...');requestAnimationFrame(tick)}
+function tick(ts){if(!running)return;const dt=Math.min(ts-last,100);last=ts;acc+=dt;
+ if(li<lines.length){const L=lines[li],sp=cSpeed(L.t);
+  while(ci<L.t.length&&acc>sp){ci++;acc-=sp}
+  if(ci>=L.t.length&&acc>L.pause){li++;ci=0;acc=0}}
+ else{if(!doneAt){doneAt=ts;st(rec?'[GRABANDO COLA...]':'[TRANSMISIÓN FINALIZADA]')}
+  if(rec&&ts-doneAt>2500){rec.stop();rec=null;running=false;st('[✔] VIDEO DESCARGADO.')}}
+ draw(ts);if(running)requestAnimationFrame(tick)}
+function draw(ts){const W=1920,H=1080,col=COL[document.getElementById('theme').value],fpx=+document.getElementById('fs').value,lh=Math.round(fpx*1.35);
+ ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+ ctx.font=fpx+'px VT323, monospace';ctx.textBaseline='top';ctx.shadowColor=col;ctx.shadowBlur=14;ctx.fillStyle=col;
+ const shown=[];for(let i=0;i<li;i++)shown.push(lines[i].t);if(li<lines.length)shown.push(lines[li].t.slice(0,ci));
+ let off=Math.max(0,shown.length*lh-(H-140));
+ shown.forEach((t,i)=>{const y=80+i*lh-off;if(y>-lh&&y<H)ctx.fillText(t,80,y)});
+ if((ts/500)%2<1){const cy=80+(shown.length-1)*lh-off;const cw=ctx.measureText(shown[shown.length-1]||'').width;ctx.fillText('█',80+cw,cy)}
+ ctx.shadowBlur=0;ctx.fillStyle='rgba(0,0,0,.22)';for(let y=0;y<H;y+=4)ctx.fillRect(0,y,W,1);
+ if(Math.random()<.06){ctx.fillStyle='rgba(255,255,255,.03)';ctx.fillRect(0,0,W,H)}}
+function fs(){document.getElementById('box').requestFullscreen();start()}
+function exportVid(){let mime='video/webm;codecs=vp9';if(!MediaRecorder.isTypeSupported(mime))mime='video/webm';
+ const stream=cv.captureStream(30);rec=new MediaRecorder(stream,{mimeType:mime});const chunks=[];
+ rec.ondataavailable=e=>chunks.push(e.data);
+ rec.onstop=()=>{const b=new Blob(chunks,{type:'video/webm'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='RB01_TRANSMISION.webm';a.click()};
+ rec.start();st('[● REC] Grabando transmisión...');start()}
+function loadOfficial(){document.getElementById('script').value=OFFICIAL;st('[✔] Transmisión oficial restaurada.')}
+document.fonts.ready.then(()=>draw(0));draw(0);
+</script>
+</body>
+</html>
